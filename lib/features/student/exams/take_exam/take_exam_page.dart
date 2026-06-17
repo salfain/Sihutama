@@ -232,7 +232,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                 onPageChanged: (i) => setState(() => _current = i),
                 itemBuilder: (_, i) {
                   final qi = _questions[i];
-                  final qiId = qi['id'] as String;
+                  final qiId = qi['id'].toString();
                   final qAns = _answers[qiId];
                   return SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
@@ -327,7 +327,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                   itemCount: _questions.length,
                   itemBuilder: (_, i) {
                     final qi = _questions[i];
-                    final qiId = qi['id'] as String;
+                    final qiId = qi['id'].toString();
                     final a = _answers[qiId];
                     Color bg = Colors.grey[200]!;
                     Color fg = Colors.grey[600]!;

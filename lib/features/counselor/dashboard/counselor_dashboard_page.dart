@@ -381,7 +381,7 @@ class _FormSheetState extends State<_FormSheet> {
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
                 ),
                 isExpanded: true,
-                items: widget.students.map((s) => DropdownMenuItem(value: s['id'] as String, child: Text('${s['name']} — ${s['className']}', overflow: TextOverflow.ellipsis))).toList(),
+                items: widget.students.map((s) => DropdownMenuItem(value: s['id'].toString(), child: Text('${s['name']} — ${s['className']}', overflow: TextOverflow.ellipsis))).toList(),
                 onChanged: (v) => setState(() => _selectedStudentId = v),
               ),
               const SizedBox(height: 16),
