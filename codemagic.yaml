@@ -24,7 +24,7 @@ workflows:
           flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
-    publishing:
+    # publishing:
       # Opsional: auto-upload ke App Store Connect / TestFlight
       # app_store_connect:
       #   api_key: $APP_STORE_CONNECT_PRIVATE_KEY
