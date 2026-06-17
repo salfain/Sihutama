@@ -11,11 +11,13 @@ import '../features/student/exams/take_exam/exam_locked_page.dart';
 import '../features/student/exams/finish/exam_finish_page.dart';
 import '../features/student/results/student_results_page.dart';
 import '../features/student/bk/student_bk_page.dart';
+import '../features/student/student_shell_page.dart';
 import '../features/teacher/dashboard/teacher_dashboard_page.dart';
 import '../features/teacher/questions/questions_page.dart';
 import '../features/teacher/exams/teacher_exams_page.dart';
 import '../features/teacher/monitoring/monitoring_page.dart';
 import '../features/teacher/essay_grading/essay_grading_page.dart';
+import '../features/teacher/teacher_shell_page.dart';
 import '../features/counselor/dashboard/counselor_dashboard_page.dart';
 import '../features/counselor/counseling/counselor_counseling_page.dart';
 import '../features/counselor/students/counselor_students_page.dart';
@@ -31,8 +33,18 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/', builder: (_, __) => const SplashPage()),
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
       // Student
-      GoRoute(path: '/student', builder: (_, __) => const StudentDashboardPage()),
-      GoRoute(path: '/student/exams', builder: (_, __) => const StudentExamsPage()),
+      ShellRoute(
+        builder: (context, state, child) {
+          return StudentShellPage(child: child);
+        },
+        routes: [
+          GoRoute(path: '/student', builder: (_, __) => const StudentDashboardPage()),
+          GoRoute(path: '/student/exams', builder: (_, __) => const StudentExamsPage()),
+          GoRoute(path: '/student/results', builder: (_, __) => const StudentResultsPage()),
+          GoRoute(path: '/student/bk', builder: (_, __) => const StudentBkPage()),
+        ],
+      ),
+      // Student sub-routes outside shell
       GoRoute(path: '/student/exams/:id/token', builder: (_, state) =>
         TokenInputPage(examId: state.pathParameters['id']!)),
       GoRoute(path: '/student/exams/:id/confirm', builder: (_, state) =>
@@ -43,15 +55,21 @@ final routerProvider = Provider<GoRouter>((ref) {
         ExamLockedPage(examId: state.pathParameters['id']!, reason: state.uri.queryParameters['reason'])),
       GoRoute(path: '/student/exams/:id/finish', builder: (_, state) =>
         ExamFinishPage(examId: state.pathParameters['id']!)),
-      GoRoute(path: '/student/results', builder: (_, __) => const StudentResultsPage()),
-      GoRoute(path: '/student/bk', builder: (_, __) => const StudentBkPage()),
       GoRoute(path: '/student/bk/survey/:id', builder: (_, state) =>
         StudentSurveyPage(surveyId: state.pathParameters['id']!)),
       // Teacher
-      GoRoute(path: '/teacher', builder: (_, __) => const TeacherDashboardPage()),
-      GoRoute(path: '/teacher/questions', builder: (_, __) => const QuestionsPage()),
-      GoRoute(path: '/teacher/exams', builder: (_, __) => const TeacherExamsPage()),
-      GoRoute(path: '/teacher/essay-grading', builder: (_, __) => const EssayGradingPage()),
+      ShellRoute(
+        builder: (context, state, child) {
+          return TeacherShellPage(child: child);
+        },
+        routes: [
+          GoRoute(path: '/teacher', builder: (_, __) => const TeacherDashboardPage()),
+          GoRoute(path: '/teacher/questions', builder: (_, __) => const QuestionsPage()),
+          GoRoute(path: '/teacher/exams', builder: (_, __) => const TeacherExamsPage()),
+          GoRoute(path: '/teacher/essay-grading', builder: (_, __) => const EssayGradingPage()),
+        ],
+      ),
+      // Teacher sub-routes outside shell
       GoRoute(path: '/teacher/monitoring/:examId', builder: (_, state) =>
         MonitoringPage(examId: state.pathParameters['examId']!)),
       // Counselor (Guru BK)

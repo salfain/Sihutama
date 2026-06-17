@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/network/api_client.dart';
 
+const teacherPrimaryColor = Color(0xFF1D4ED8); // Blue 700
+const teacherGradient = LinearGradient(
+  colors: [Color(0xFF3B82F6), Color(0xFF1D4ED8)],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+);
+
 class TeacherDashboardPage extends StatefulWidget {
   const TeacherDashboardPage({super.key});
   @override
@@ -10,6 +17,7 @@ class TeacherDashboardPage extends StatefulWidget {
 
 class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Map<String, dynamic>? _data;
+  Map<String, dynamic>? _user;
   bool _loading = true;
 
   @override
@@ -18,8 +26,14 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   Future<void> _load() async {
     setState(() => _loading = true);
     try {
-      final res = await ApiClient().dio.get('/teacher/dashboard');
-      setState(() => _data = res.data);
+      final [dashRes, meRes] = await Future.wait([
+        ApiClient().dio.get('/teacher/dashboard'),
+        ApiClient().dio.get('/auth/me'),
+      ]);
+      setState(() {
+        _data = dashRes.data;
+        _user = meRes.data;
+      });
     } catch (_) {}
     setState(() => _loading = false);
   }
@@ -27,10 +41,13 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Dashboard Guru'),
+        title: const Text('SI Hutama - Guru', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.logout, size: 22), onPressed: () async {
+          IconButton(icon: const Icon(Icons.logout, color: Colors.black87), onPressed: () async {
             final router = GoRouter.of(context);
             await ApiClient().clearToken();
             router.go('/login');
@@ -38,69 +55,144 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
         ],
       ),
       body: _loading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(color: teacherPrimaryColor))
         : RefreshIndicator(
             onRefresh: _load,
+            color: teacherPrimaryColor,
             child: ListView(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.all(20),
               children: [
+                // Premium Header
+                Container(
+                  padding: const EdgeInsets.all(24),
+                  decoration: BoxDecoration(
+                    gradient: teacherGradient,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: teacherPrimaryColor.withAlpha(80),
+                        blurRadius: 15,
+                        offset: const Offset(0, 8),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Selamat datang,',
+                        style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 14, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        _user?['name'] ?? 'Guru',
+                        style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 32),
+                
                 // Stat cards
                 GridView.count(
-                  crossAxisCount: 2, shrinkWrap: true,
+                  crossAxisCount: 2, 
+                  shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 1.6,
+                  crossAxisSpacing: 16, 
+                  mainAxisSpacing: 16, 
+                  childAspectRatio: 1.4,
                   children: [
-                    _statCard('Bank Soal', '${_data?['totalQuestions'] ?? 0}', Icons.quiz, Colors.blue),
-                    _statCard('Ujian', '${_data?['totalExams'] ?? 0}', Icons.assignment, Colors.green),
-                    _statCard('Esai Pending', '${_data?['pendingEssays'] ?? 0}', Icons.edit_note, Colors.orange),
-                    _statCard('Peserta', '${_data?['totalParticipants'] ?? 0}', Icons.people, Colors.purple),
+                    _statCard('Bank Soal', '${_data?['totalQuestions'] ?? 0}', Icons.quiz_outlined, Colors.indigo),
+                    _statCard('Ujian Aktif', '${_data?['totalExams'] ?? 0}', Icons.assignment_outlined, Colors.green),
+                    _statCard('Koreksi Esai', '${_data?['pendingEssays'] ?? 0}', Icons.edit_note_outlined, Colors.orange),
+                    _statCard('Peserta', '${_data?['totalParticipants'] ?? 0}', Icons.people_outline, Colors.purple),
                   ],
                 ),
-                const SizedBox(height: 24),
+                const SizedBox(height: 32),
+                
                 // Quick actions
-                const Text('Menu', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                const SizedBox(height: 12),
-                _menuItem(Icons.quiz_outlined, 'Bank Soal', 'Kelola soal', () => context.push('/teacher/questions')),
-                _menuItem(Icons.assignment_outlined, 'Paket Ujian', 'Buat & kelola ujian', () => context.push('/teacher/exams')),
-                _menuItem(Icons.edit_note_outlined, 'Koreksi Esai', 'Nilai jawaban esai siswa', () => context.push('/teacher/essay-grading')),
-                _menuItem(Icons.monitor_heart_outlined, 'Monitoring', 'Pantau peserta ujian', () => context.push('/teacher/exams')),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(color: teacherPrimaryColor.withAlpha(30), borderRadius: BorderRadius.circular(8)),
+                      child: const Icon(Icons.grid_view_rounded, size: 18, color: teacherPrimaryColor),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text('Aksi Cepat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _menuItem(Icons.quiz_outlined, 'Kelola Bank Soal', 'Buat & edit soal pilihan ganda / esai', () => context.push('/teacher/questions')),
+                _menuItem(Icons.assignment_outlined, 'Jadwal & Paket Ujian', 'Atur sesi ujian untuk siswa', () => context.push('/teacher/exams')),
+                _menuItem(Icons.edit_note_outlined, 'Koreksi Jawaban Esai', 'Beri nilai untuk jawaban uraian', () => context.push('/teacher/essay-grading')),
+                _menuItem(Icons.monitor_heart_outlined, 'Live Monitoring', 'Pantau peserta yang sedang ujian', () => context.push('/teacher/exams')), // They choose exam first
               ],
             ),
           ),
     );
   }
 
-  Widget _statCard(String label, String value, IconData icon, Color color) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Icon(icon, color: color, size: 24),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(value, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.grey[800])),
-              Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-            ]),
-          ],
-        ),
+  Widget _statCard(String label, String value, IconData icon, MaterialColor color) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(color: color.shade50, borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, color: color.shade600, size: 20),
+              ),
+              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+            ],
+          ),
+          Text(label, style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
+        ],
       ),
     );
   }
 
   Widget _menuItem(IconData icon, String title, String sub, VoidCallback onTap) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 2)),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
       child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
-          width: 40, height: 40,
-          decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(10)),
-          child: Icon(icon, color: Colors.green[700], size: 22),
+          width: 48, height: 48,
+          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, color: teacherPrimaryColor, size: 24),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-        subtitle: Text(sub, style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.chevron_right),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(sub, style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle),
+          child: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey.shade400),
+        ),
         onTap: onTap,
       ),
     );

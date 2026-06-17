@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../core/network/api_client.dart';
 import '../../shared/widgets/answer_review_sheet.dart';
 
+const studentPrimaryColor = Color(0xFFEA580C);
+
 class StudentResultsPage extends StatefulWidget {
   const StudentResultsPage({super.key});
   @override
@@ -27,60 +29,124 @@ class _StudentResultsPageState extends State<StudentResultsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Riwayat Nilai')),
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Riwayat Nilai', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: _loading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(color: studentPrimaryColor))
         : RefreshIndicator(
             onRefresh: _load,
+            color: studentPrimaryColor,
             child: _results.isEmpty
-              ? const Center(child: Text('Belum ada nilai'))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.emoji_events_outlined, size: 64, color: Colors.grey.shade300),
+                      const SizedBox(height: 16),
+                      Text('Belum ada nilai', style: TextStyle(color: Colors.grey.shade500, fontSize: 16, fontWeight: FontWeight.w500)),
+                    ],
+                  ),
+                )
               : ListView.builder(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(16),
                   itemCount: _results.length,
                   itemBuilder: (_, i) {
                     final r = _results[i];
                     final score = r['score'];
                     final passed = r['exam']?['passingScore'] != null && (score ?? 0) >= r['exam']['passingScore'];
                     final canReview = r['exam']?['showResult'] == true;
-                    return Card(
-                      margin: const EdgeInsets.only(bottom: 10),
+                    
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
+                        ],
+                        border: Border.all(color: Colors.grey.shade100),
+                      ),
                       child: Padding(
-                        padding: const EdgeInsets.all(14),
+                        padding: const EdgeInsets.all(20),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(r['exam']?['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
+                                      Text(r['exam']?['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.menu_book, size: 14, color: Colors.grey.shade500),
+                                          const SizedBox(width: 4),
+                                          Text('${r['exam']?['subject']?['code'] ?? ''}', style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w500)),
+                                        ],
+                                      ),
                                       const SizedBox(height: 4),
-                                      Text('${r['exam']?['subject']?['code'] ?? ''} · Benar: ${r['correct']} · Salah: ${r['wrong']}',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                                      Row(
+                                        children: [
+                                          Icon(Icons.check_circle_outline, size: 14, color: Colors.green.shade500),
+                                          const SizedBox(width: 4),
+                                          Text('Benar: ${r['correct']}', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                                          const SizedBox(width: 12),
+                                          Icon(Icons.cancel_outlined, size: 14, color: Colors.red.shade400),
+                                          const SizedBox(width: 4),
+                                          Text('Salah: ${r['wrong']}', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),
                                 Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
                                   children: [
                                     Text('${score ?? '—'}',
-                                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: (score ?? 0) >= 75 ? Colors.green[700] : Colors.red)),
+                                      style: TextStyle(
+                                        fontSize: 28, 
+                                        fontWeight: FontWeight.bold, 
+                                        color: (score ?? 0) >= 75 ? Colors.green.shade700 : Colors.red.shade600
+                                      )
+                                    ),
                                     if (r['exam']?['passingScore'] != null)
-                                      Text(passed ? 'Lulus' : 'Tidak Lulus',
-                                        style: TextStyle(fontSize: 10, color: passed ? Colors.green : Colors.red, fontWeight: FontWeight.w600)),
+                                      Container(
+                                        margin: const EdgeInsets.only(top: 4),
+                                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: passed ? Colors.green.shade50 : Colors.red.shade50,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(passed ? 'Lulus' : 'Tidak Lulus',
+                                          style: TextStyle(fontSize: 11, color: passed ? Colors.green.shade700 : Colors.red.shade700, fontWeight: FontWeight.bold)),
+                                      ),
                                   ],
                                 ),
                               ],
                             ),
                             if (canReview) ...[
-                              const SizedBox(height: 10),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 12),
+                                child: Divider(height: 1),
+                              ),
                               SizedBox(
                                 width: double.infinity,
-                                child: OutlinedButton.icon(
+                                child: TextButton.icon(
                                   onPressed: () => AnswerReviewSheet.show(context, r['id']),
-                                  icon: const Icon(Icons.visibility, size: 16),
-                                  label: const Text('Lihat Jawaban', style: TextStyle(fontSize: 12)),
+                                  icon: const Icon(Icons.manage_search, size: 20),
+                                  label: const Text('Lihat Detail Jawaban', style: TextStyle(fontWeight: FontWeight.w600)),
+                                  style: TextButton.styleFrom(
+                                    foregroundColor: studentPrimaryColor,
+                                    padding: const EdgeInsets.symmetric(vertical: 10),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                                  ),
                                 ),
                               ),
                             ],

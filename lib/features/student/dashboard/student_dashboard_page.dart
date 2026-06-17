@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/network/api_client.dart';
 
+const studentPrimaryColor = Color(0xFFEA580C);
+const studentGradient = LinearGradient(
+  colors: [Color(0xFFF97316), Color(0xFFEA580C)],
+  begin: Alignment.topLeft,
+  end: Alignment.bottomRight,
+);
+
 class StudentDashboardPage extends StatefulWidget {
   const StudentDashboardPage({super.key});
   @override
@@ -37,11 +44,14 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Dashboard'),
+        title: const Text('SI Hutama - Siswa', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+        backgroundColor: Colors.white,
+        elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, size: 22),
+            icon: const Icon(Icons.logout, color: Colors.black87),
             onPressed: () async {
               final router = GoRouter.of(context);
               await ApiClient().clearToken();
@@ -51,123 +61,177 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
         ],
       ),
       body: _loading
-        ? const Center(child: CircularProgressIndicator())
-        : RefreshIndicator(
-            onRefresh: _load,
-            child: ListView(
-              padding: const EdgeInsets.all(16),
-              children: [
-                // Welcome card
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(colors: [Color(0xFFF97316), Color(0xFFEA580C)]),
-                    borderRadius: BorderRadius.circular(16),
+          ? const Center(child: CircularProgressIndicator(color: studentPrimaryColor))
+          : RefreshIndicator(
+              onRefresh: _load,
+              color: studentPrimaryColor,
+              child: ListView(
+                padding: const EdgeInsets.all(20),
+                children: [
+                  // Glassmorphism-style Header
+                  Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      gradient: studentGradient,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: studentPrimaryColor.withAlpha(80),
+                          blurRadius: 15,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Selamat datang kembali 👋',
+                          style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 14, fontWeight: FontWeight.w500),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          _user?['name'] ?? '',
+                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold, letterSpacing: -0.5),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withAlpha(40),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          child: Text(
+                            '${_user?['student']?['class']?['name'] ?? ''} • NIS: ${_user?['student']?['nis'] ?? ''}',
+                            style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Selamat datang,', style: TextStyle(color: Colors.orange[100], fontSize: 13)),
-                      const SizedBox(height: 4),
-                      Text(_user?['name'] ?? '', style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-                      const SizedBox(height: 4),
-                      Text(
-                        '${_user?['student']?['class']?['name'] ?? ''} · NIS: ${_user?['student']?['nis'] ?? ''}',
-                        style: TextStyle(color: Colors.orange[100], fontSize: 12),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
+                  const SizedBox(height: 32),
 
-                // Ujian Hari Ini
-                _sectionTitle('Ujian Hari Ini', Icons.today),
-                const SizedBox(height: 8),
-                ...(_data?['todayExams'] as List? ?? []).map((e) => _examCard(e, true)),
+                  _sectionTitle('Ujian Hari Ini', Icons.today_rounded),
+                  const SizedBox(height: 12),
+                  ...(_data?['todayExams'] as List? ?? []).map((e) => _examCard(e, true)),
+                  if ((_data?['todayExams'] as List?)?.isEmpty ?? true)
+                    _emptyState('Belum ada jadwal ujian hari ini.'),
 
-                if ((_data?['todayExams'] as List?)?.isEmpty ?? true)
-                  _emptyCard('Tidak ada ujian hari ini'),
+                  const SizedBox(height: 32),
+                  _sectionTitle('Jadwal Mendatang', Icons.calendar_month_rounded),
+                  const SizedBox(height: 12),
+                  ...(_data?['upcomingExams'] as List? ?? []).map((e) => _upcomingItem(e)),
+                  if ((_data?['upcomingExams'] as List?)?.isEmpty ?? true)
+                    _emptyState('Tidak ada ujian mendatang.'),
 
-                const SizedBox(height: 20),
-                _sectionTitle('Jadwal Mendatang', Icons.calendar_month),
-                const SizedBox(height: 8),
-                ...(_data?['upcomingExams'] as List? ?? []).map((e) => _upcomingItem(e)),
-
-                const SizedBox(height: 20),
-                _sectionTitle('Riwayat Terakhir', Icons.history),
-                const SizedBox(height: 8),
-                ...(_data?['history'] as List? ?? []).map((h) => _historyItem(h)),
-              ],
+                  const SizedBox(height: 32),
+                  _sectionTitle('Riwayat Terakhir', Icons.history_rounded),
+                  const SizedBox(height: 12),
+                  ...(_data?['history'] as List? ?? []).map((h) => _historyItem(h)),
+                  if ((_data?['history'] as List?)?.isEmpty ?? true)
+                    _emptyState('Belum ada riwayat ujian.'),
+                    
+                  const SizedBox(height: 40),
+                ],
+              ),
             ),
-          ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 0,
-        type: BottomNavigationBarType.fixed,
-        onTap: (i) {
-          if (i == 1) context.go('/student/exams');
-          if (i == 2) context.go('/student/results');
-          if (i == 3) context.go('/student/bk');
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.dashboard), label: 'Dashboard'),
-          BottomNavigationBarItem(icon: Icon(Icons.assignment), label: 'Ujian'),
-          BottomNavigationBarItem(icon: Icon(Icons.emoji_events), label: 'Nilai'),
-          BottomNavigationBarItem(icon: Icon(Icons.favorite), label: 'Konseling'),
-        ],
-      ),
     );
   }
 
   Widget _sectionTitle(String title, IconData icon) {
     return Row(children: [
-      Icon(icon, size: 20, color: Colors.orange[700]),
-      const SizedBox(width: 8),
-      Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+      Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: studentPrimaryColor.withAlpha(30),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, size: 18, color: studentPrimaryColor),
+      ),
+      const SizedBox(width: 12),
+      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
     ]);
   }
 
-  Widget _emptyCard(String msg) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Center(child: Text(msg, style: TextStyle(color: Colors.grey[500], fontSize: 13))),
+  Widget _emptyState(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          Icon(Icons.inbox_rounded, size: 40, color: Colors.grey.shade300),
+          const SizedBox(height: 12),
+          Text(message, style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)),
+        ],
       ),
     );
   }
 
   Widget _examCard(dynamic e, bool showButton) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(6)),
-                  child: Text('● Tersedia', style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.w600)),
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                  child: Row(
+                    children: [
+                      Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.green.shade600, shape: BoxShape.circle)),
+                      const SizedBox(width: 6),
+                      Text('Tersedia', style: TextStyle(color: Colors.green.shade700, fontSize: 11, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
                 ),
                 const Spacer(),
-                Text(e['subject']?['code'] ?? '', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                Text(e['subject']?['code'] ?? '', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w600)),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
-            const SizedBox(height: 4),
-            Text('${e['subject']?['name'] ?? ''} · ${e['_count']?['questions'] ?? 0} soal · ${e['durationMinutes'] ?? 0} menit',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+            const SizedBox(height: 12),
+            Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+            const SizedBox(height: 6),
+            Row(
+              children: [
+                Icon(Icons.menu_book, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 4),
+                Text(e['subject']?['name'] ?? '', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                const SizedBox(width: 12),
+                Icon(Icons.timer, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 4),
+                Text('${e['durationMinutes'] ?? 0} mnt', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              ],
+            ),
             if (showButton) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
-                child: ElevatedButton.icon(
+                child: ElevatedButton(
                   onPressed: () => context.push('/student/exams/${e['id']}/token'),
-                  icon: const Icon(Icons.arrow_forward, size: 18),
-                  label: const Text('Masuk Ujian'),
-                  style: ElevatedButton.styleFrom(backgroundColor: Colors.green[600]),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: studentPrimaryColor,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                  child: const Text('Masuk Ujian', style: TextStyle(fontWeight: FontWeight.bold)),
                 ),
               ),
             ],
@@ -178,30 +242,64 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   }
 
   Widget _upcomingItem(dynamic e) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: ListTile(
-        dense: true,
-        title: Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-        subtitle: Text('${e['subject']?['code'] ?? ''} · ${e['durationMinutes'] ?? 0} mnt', style: const TextStyle(fontSize: 12)),
-        trailing: const Icon(Icons.lock_clock, color: Colors.blue, size: 20),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(10)),
+          child: Icon(Icons.lock_clock, color: Colors.blue.shade600, size: 20),
+        ),
+        title: Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text('${e['subject']?['code'] ?? ''} • ${e['durationMinutes'] ?? 0} mnt', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+        ),
       ),
     );
   }
 
   Widget _historyItem(dynamic h) {
     final score = h['score'];
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+    final isGood = (score ?? 0) >= 75;
+    
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
       child: ListTile(
-        dense: true,
-        title: Text(h['exam']?['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-        subtitle: Text(h['exam']?['subject']?['code'] ?? '', style: const TextStyle(fontSize: 12)),
-        trailing: Text(
-          score != null ? '$score' : '—',
-          style: TextStyle(
-            fontWeight: FontWeight.bold, fontSize: 18,
-            color: (score ?? 0) >= 75 ? Colors.green[700] : Colors.red[500],
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(10)),
+          child: Icon(Icons.history_edu, color: Colors.purple.shade600, size: 20),
+        ),
+        title: Text(h['exam']?['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        subtitle: Padding(
+          padding: const EdgeInsets.only(top: 4),
+          child: Text(h['exam']?['subject']?['code'] ?? '', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+        ),
+        trailing: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: isGood ? Colors.green.shade50 : Colors.red.shade50,
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Text(
+            score != null ? '$score' : '—',
+            style: TextStyle(
+              fontWeight: FontWeight.bold, fontSize: 16,
+              color: isGood ? Colors.green.shade700 : Colors.red.shade700,
+            ),
           ),
         ),
       ),

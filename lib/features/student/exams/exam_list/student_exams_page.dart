@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/network/api_client.dart';
 
+const studentPrimaryColor = Color(0xFFEA580C);
+
 class StudentExamsPage extends StatefulWidget {
   const StudentExamsPage({super.key});
   @override
@@ -32,19 +34,27 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Ujian Saya')),
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: const Text('Ujian Saya', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: _loading
-        ? const Center(child: CircularProgressIndicator())
+        ? const Center(child: CircularProgressIndicator(color: studentPrimaryColor))
         : RefreshIndicator(
             onRefresh: _load,
+            color: studentPrimaryColor,
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Filter chips
-                SizedBox(
-                  height: 48,
+                Container(
+                  color: Colors.white,
+                  height: 60,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                     children: [
                       _chip('all', 'Semua'),
                       _chip('UH', 'UH'),
@@ -57,9 +67,18 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                 ),
                 Expanded(
                   child: _filtered.isEmpty
-                    ? Center(child: Text('Tidak ada ujian', style: TextStyle(color: Colors.grey[500])))
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.assignment_turned_in_outlined, size: 48, color: Colors.grey.shade300),
+                            const SizedBox(height: 12),
+                            Text('Belum ada ujian', style: TextStyle(color: Colors.grey.shade500, fontSize: 14, fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                      )
                     : ListView.builder(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(16),
                         itemCount: _filtered.length,
                         itemBuilder: (_, i) => _examCard(_filtered[i]),
                       ),
@@ -73,14 +92,27 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   Widget _chip(String val, String label) {
     final sel = _filter == val;
     return Padding(
-      padding: const EdgeInsets.only(right: 6),
-      child: ChoiceChip(
-        label: Text(label, style: TextStyle(fontSize: 12, fontWeight: sel ? FontWeight.w600 : FontWeight.w500)),
-        selected: sel,
-        onSelected: (_) => setState(() => _filter = val),
-        selectedColor: const Color(0xFFDDEAFF),
-        padding: const EdgeInsets.symmetric(horizontal: 4),
-        visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.only(right: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        child: ChoiceChip(
+          label: Text(label, style: TextStyle(
+            fontSize: 13, 
+            fontWeight: sel ? FontWeight.bold : FontWeight.w500,
+            color: sel ? Colors.white : Colors.grey.shade700,
+          )),
+          selected: sel,
+          onSelected: (_) => setState(() => _filter = val),
+          selectedColor: studentPrimaryColor,
+          backgroundColor: Colors.grey.shade100,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+            side: BorderSide(color: sel ? studentPrimaryColor : Colors.grey.shade200),
+          ),
+          elevation: sel ? 2 : 0,
+          showCheckmark: false,
+        ),
       ),
     );
   }
@@ -93,37 +125,79 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     final end = DateTime.tryParse(e['endAt'] ?? '') ?? now;
     final isAvailable = e['status'] == 'ACTIVE' && now.isAfter(start) && now.isBefore(end) && !isDone;
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(children: [
               _typeBadge(e['examType']),
-              const SizedBox(width: 6),
-              Expanded(child: Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14), overflow: TextOverflow.ellipsis)),
+              const SizedBox(width: 8),
+              Expanded(child: Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), overflow: TextOverflow.ellipsis)),
             ]),
-            const SizedBox(height: 6),
-            Text('${e['subject']?['name'] ?? ''} · ${e['questionCount'] ?? 0} soal · ${e['durationMinutes']} mnt', style: TextStyle(color: Colors.grey[600], fontSize: 12)),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.menu_book, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 4),
+                Text(e['subject']?['name'] ?? '', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                const SizedBox(width: 12),
+                Icon(Icons.quiz, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 4),
+                Text('${e['questionCount'] ?? 0} soal', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              ],
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(Icons.timer, size: 14, color: Colors.grey.shade500),
+                const SizedBox(width: 4),
+                Text('${e['durationMinutes']} mnt', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+              ],
+            ),
+            const SizedBox(height: 16),
             if (isAvailable)
               SizedBox(width: double.infinity, child: ElevatedButton(
                 onPressed: () => context.push('/student/exams/${e['id']}/token'),
-                style: ElevatedButton.styleFrom(backgroundColor: Colors.green[600]),
-                child: const Text('Masuk Ujian'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.green.shade600,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+                child: const Text('Masuk Ujian', style: TextStyle(fontWeight: FontWeight.bold)),
               ))
             else if (isDone)
               SizedBox(width: double.infinity, child: OutlinedButton.icon(
                 onPressed: () => context.push('/student/results'),
-                icon: const Icon(Icons.check_circle, size: 18),
-                label: Text('Nilai: ${attempt['score'] ?? '—'}'),
+                icon: Icon(Icons.check_circle, size: 18, color: Colors.green.shade600),
+                label: Text('Selesai • Nilai: ${attempt['score'] ?? '—'}', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: Colors.green.shade200),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
               ))
             else
               SizedBox(width: double.infinity, child: OutlinedButton(
                 onPressed: null,
-                child: Text(now.isBefore(start) ? 'Belum Dimulai' : 'Tidak Tersedia'),
+                style: OutlinedButton.styleFrom(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  backgroundColor: Colors.grey.shade100,
+                ),
+                child: Text(now.isBefore(start) ? 'Belum Dimulai' : 'Waktu Habis', style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
               )),
           ],
         ),
@@ -135,9 +209,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     final colors = {'UH': Colors.blue, 'UTS': Colors.purple, 'UAS': Colors.orange, 'US': Colors.red, 'TRYOUT': Colors.teal};
     final c = colors[type] ?? Colors.grey;
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(color: c.withAlpha(25), borderRadius: BorderRadius.circular(4), border: Border.all(color: c.withAlpha(80))),
-      child: Text(type ?? '—', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: c)),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(color: c.withAlpha(25), borderRadius: BorderRadius.circular(6), border: Border.all(color: c.withAlpha(50))),
+      child: Text(type ?? '—', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: c)),
     );
   }
 }
