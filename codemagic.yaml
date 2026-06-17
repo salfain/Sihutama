@@ -9,9 +9,9 @@ workflows:
       # Atau bisa pakai manual signing di bawah
       groups:
         - app_store_credentials  # opsional: jika mau auto-upload ke TestFlight
-      ios_signing:
-        distribution_type: app_store  # atau "ad_hoc" untuk test internal
-        bundle_identifier: com.example.cbtSmkhutama
+      # ios_signing:
+        # distribution_type: app_store  # atau "ad_hoc" untuk test internal
+        # bundle_identifier: com.example.cbtSmkhutama
     scripts:
       - name: Get dependencies
         script: |
@@ -21,7 +21,7 @@ workflows:
           flutter analyze lib
       - name: Build IPA
         script: |
-          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+          flutter build ios --release --no-codesign
     artifacts:
       - build/ios/ipa/*.ipa
     # publishing:
