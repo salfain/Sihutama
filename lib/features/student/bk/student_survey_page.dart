@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
 
+const studentPrimaryColor = Color(0xFFEA580C);
+
 class StudentSurveyPage extends StatefulWidget {
   final String surveyId;
   const StudentSurveyPage({super.key, required this.surveyId});
@@ -50,7 +52,7 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
     try {
       await ApiClient().dio.post('/student/surveys/${widget.surveyId}', data: {
         'answers': _answers.entries
-            .map((e) => {'questionId': e.key, 'value': e.value})
+            .map((e) => {'questionId': int.tryParse(e.key) ?? e.key, 'value': e.value})
             .toList(),
       });
       if (!mounted) return;
@@ -58,16 +60,29 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
         context: context,
         barrierDismissible: false,
         builder: (ctx) => AlertDialog(
-          title: const Text('Berhasil'),
-          content: const Text('Terima kasih! Jawaban kamu sudah tersimpan.'),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text('Berhasil', style: TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.check_circle, size: 64, color: Colors.green.shade500),
+              const SizedBox(height: 16),
+              const Text('Terima kasih! Jawaban kamu sudah tersimpan.', textAlign: TextAlign.center, style: TextStyle(fontSize: 15)),
+            ],
+          ),
           actions: [
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(ctx);
                 Navigator.pop(context);
               },
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF7C3AED)),
-              child: const Text('OK'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: studentPrimaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                minimumSize: const Size(double.infinity, 48),
+              ),
+              child: const Text('Kembali', style: TextStyle(fontWeight: FontWeight.bold)),
             ),
           ],
         ),
@@ -84,9 +99,15 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(_survey?['title'] ?? 'Angket')),
+      backgroundColor: Colors.grey[50],
+      appBar: AppBar(
+        title: Text(_survey?['title'] ?? 'Angket', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black87),
+      ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: studentPrimaryColor))
           : _answered
               ? Center(
                   child: Padding(
@@ -94,16 +115,16 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, size: 64, color: Colors.green[400]),
-                        const SizedBox(height: 16),
+                        Icon(Icons.check_circle, size: 80, color: Colors.green.shade400),
+                        const SizedBox(height: 24),
                         const Text(
                           'Sudah diisi',
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         Text(
                           'Kamu sudah mengisi angket ini sebelumnya.',
-                          style: TextStyle(color: Colors.grey[600]),
+                          style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -116,31 +137,58 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                         (_survey!['description'] as String).isNotEmpty)
                       Container(
                         width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        color: Colors.purple[50],
-                        child: Text(
-                          _survey!['description'],
-                          style: TextStyle(fontSize: 13, color: Colors.purple[800]),
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.orange.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.orange.shade100),
+                        ),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.orange.shade600, size: 20),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                _survey!['description'],
+                                style: TextStyle(fontSize: 13, color: Colors.orange.shade900, height: 1.4),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     Expanded(
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(12),
+                        padding: EdgeInsets.only(
+                          left: 16, 
+                          right: 16, 
+                          bottom: 16, 
+                          top: _survey?['description'] != null && (_survey!['description'] as String).isNotEmpty ? 0 : 16
+                        ),
                         itemCount: _questions.length,
                         itemBuilder: (_, i) => _questionCard(i, _questions[i]),
                       ),
                     ),
-                    SafeArea(
-                      child: Padding(
-                        padding: const EdgeInsets.all(14),
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, -5)),
+                        ],
+                      ),
+                      child: SafeArea(
                         child: SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
                             onPressed: _submitting ? null : _submit,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF7C3AED),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                              backgroundColor: studentPrimaryColor,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             ),
                             child: _submitting
                                 ? const SizedBox(
@@ -148,7 +196,7 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                                     height: 20,
                                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                                   )
-                                : const Text('Kirim Jawaban', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                                : const Text('Kirim Jawaban', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                           ),
                         ),
                       ),
@@ -159,7 +207,7 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
   }
 
   Widget _questionCard(int index, dynamic q) {
-    final qId = q['id'] as String;
+    final qId = q['id'].toString();
     final selectedValue = _answers[qId];
     const labels = {
       1: 'Tidak Butuh',
@@ -168,35 +216,64 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
       4: 'Sangat Butuh',
     };
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+        border: Border.all(color: Colors.grey.shade100),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(14),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '${index + 1}. ${q['text']}',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  width: 28, height: 28,
+                  decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
+                  child: Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, color: studentPrimaryColor))),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    q['text'],
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87, height: 1.4),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Wrap(
               spacing: 8,
-              runSpacing: 8,
+              runSpacing: 10,
               children: labels.entries.map((e) {
                 final isSelected = selectedValue == e.key;
-                return ChoiceChip(
-                  label: Text(e.value),
-                  selected: isSelected,
-                  selectedColor: const Color(0xFF7C3AED).withValues(alpha: 0.15),
-                  labelStyle: TextStyle(
-                    fontSize: 12,
-                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                    color: isSelected ? const Color(0xFF7C3AED) : Colors.grey[700],
+                return InkWell(
+                  onTap: () => setState(() => _answers[qId] = e.key),
+                  borderRadius: BorderRadius.circular(20),
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: isSelected ? studentPrimaryColor : Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: isSelected ? studentPrimaryColor : Colors.grey.shade200),
+                    ),
+                    child: Text(
+                      e.value,
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        color: isSelected ? Colors.white : Colors.grey.shade700,
+                      ),
+                    ),
                   ),
-                  onSelected: (_) {
-                    setState(() => _answers[qId] = e.key);
-                  },
                 );
               }).toList(),
             ),
