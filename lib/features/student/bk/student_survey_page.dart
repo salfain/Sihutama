@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
+import '../../../../app/theme.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
 
@@ -98,13 +99,14 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: Text(_survey?['title'] ?? 'Angket', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: Text(_survey?['title'] ?? 'Angket', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.black87),
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black87),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: studentPrimaryColor))
@@ -115,16 +117,16 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle, size: 80, color: Colors.green.shade400),
+                        Icon(Icons.check_circle, size: 80, color: isDark ? Colors.green.shade500 : Colors.green.shade400),
                         const SizedBox(height: 24),
-                        const Text(
+                        Text(
                           'Sudah diisi',
-                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87),
                         ),
                         const SizedBox(height: 12),
                         Text(
                           'Kamu sudah mengisi angket ini sebelumnya.',
-                          style: TextStyle(color: Colors.grey.shade600, fontSize: 15),
+                          style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 15),
                           textAlign: TextAlign.center,
                         ),
                       ],
@@ -135,29 +137,29 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                   children: [
                     if (_survey?['description'] != null &&
                         (_survey!['description'] as String).isNotEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(16),
-                        margin: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: Colors.orange.shade50,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.orange.shade100),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(Icons.info_outline, color: Colors.orange.shade600, size: 20),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                _survey!['description'],
-                                style: TextStyle(fontSize: 13, color: Colors.orange.shade900, height: 1.4),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          margin: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.orange.shade900.withAlpha(100) : Colors.orange.shade50,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: isDark ? Colors.orange.shade900.withAlpha(50) : Colors.orange.shade100),
+                          ),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Icon(Icons.info_outline, color: isDark ? Colors.orange.shade400 : Colors.orange.shade600, size: 20),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  _survey!['description'],
+                                  style: TextStyle(fontSize: 13, color: isDark ? Colors.orange.shade200 : Colors.orange.shade900, height: 1.4),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
                     Expanded(
                       child: ListView.builder(
                         padding: EdgeInsets.only(
@@ -173,10 +175,11 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, -5)),
+                          if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, -5)),
                         ],
+                        border: Border(top: BorderSide(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent)),
                       ),
                       child: SafeArea(
                         child: SizedBox(
@@ -207,6 +210,7 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
   }
 
   Widget _questionCard(int index, dynamic q) {
+    final isDark = AppTheme.isDark(context);
     final qId = q['id'].toString();
     final selectedValue = _answers[qId];
     const labels = {
@@ -218,36 +222,36 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
-        ],
-        border: Border.all(color: Colors.grey.shade100),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 28, height: 28,
-                  decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
-                  child: Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, color: studentPrimaryColor))),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    q['text'],
-                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: Colors.black87, height: 1.4),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
+          ],
+          border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 28, height: 28,
+                    decoration: BoxDecoration(color: isDark ? Colors.orange.shade900.withAlpha(100) : Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
+                    child: Center(child: Text('${index + 1}', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.orange.shade400 : studentPrimaryColor))),
                   ),
-                ),
-              ],
-            ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      q['text'],
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: isDark ? Colors.white : Colors.black87, height: 1.4),
+                    ),
+                  ),
+                ],
+              ),
             const SizedBox(height: 20),
             Wrap(
               spacing: 8,
@@ -261,16 +265,16 @@ class _StudentSurveyPageState extends State<StudentSurveyPage> {
                     duration: const Duration(milliseconds: 200),
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: isSelected ? studentPrimaryColor : Colors.grey.shade50,
+                      color: isSelected ? studentPrimaryColor : (isDark ? Colors.white.withAlpha(10) : Colors.grey.shade50),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: isSelected ? studentPrimaryColor : Colors.grey.shade200),
+                      border: Border.all(color: isSelected ? studentPrimaryColor : (isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200)),
                     ),
                     child: Text(
                       e.value,
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.grey.shade700,
+                        color: isSelected ? Colors.white : (isDark ? Colors.grey.shade400 : Colors.grey.shade700),
                       ),
                     ),
                   ),

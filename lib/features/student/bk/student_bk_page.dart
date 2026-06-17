@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
+import '../../../../app/theme.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
 
@@ -47,6 +48,7 @@ class _StudentBkPageState extends State<StudentBkPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     final cases = (_data?['cases'] as List?) ?? [];
     final violations = (_data?['violations'] as List?) ?? [];
     final achievements = (_data?['achievements'] as List?) ?? [];
@@ -55,10 +57,10 @@ class _StudentBkPageState extends State<StudentBkPage> {
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: Colors.grey[50],
+        backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
         appBar: AppBar(
-          title: const Text('Bimbingan Konseling', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87)),
-          backgroundColor: Colors.white,
+          title: Text('Bimbingan Konseling', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
           elevation: 0,
           bottom: _loading
               ? null
@@ -109,11 +111,12 @@ class _StudentBkPageState extends State<StudentBkPage> {
   }
 
   Widget _pointsBar() {
+    final isDark = AppTheme.isDark(context);
     final vp = _data?['violationPoints'] ?? 0;
     final ap = _data?['achievementPoints'] ?? 0;
     final np = _data?['netPoints'] ?? 0;
     return Container(
-      color: Colors.white,
+      color: isDark ? const Color(0xFF1E293B) : Colors.white,
       padding: const EdgeInsets.only(left: 16, right: 16, bottom: 16, top: 8),
       child: Row(
         children: [
@@ -128,46 +131,51 @@ class _StudentBkPageState extends State<StudentBkPage> {
   }
 
   Widget _pointCard(String label, String value, MaterialColor color) {
+    final isDark = AppTheme.isDark(context);
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: color.shade50,
+          color: isDark ? color.shade900.withAlpha(50) : color.shade50,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: color.shade100),
+          border: Border.all(color: isDark ? color.shade900.withAlpha(100) : color.shade100),
         ),
         child: Column(
           children: [
-            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color.shade700)),
+            Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? color.shade300 : color.shade700)),
             const SizedBox(height: 2),
-            Text(label, style: TextStyle(fontSize: 11, color: color.shade800, fontWeight: FontWeight.w600)),
+            Text(label, style: TextStyle(fontSize: 11, color: isDark ? color.shade200 : color.shade800, fontWeight: FontWeight.w600)),
           ],
         ),
       ),
     );
   }
 
-  Widget _empty(String msg, IconData icon) => Center(
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 48, color: Colors.grey.shade300),
-        const SizedBox(height: 12),
-        Text(msg, textAlign: TextAlign.center, style: TextStyle(color: Colors.grey.shade500, fontSize: 14, fontWeight: FontWeight.w500)),
-      ],
-    )
-  );
+  Widget _empty(String msg, IconData icon) {
+    final isDark = AppTheme.isDark(context);
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, size: 48, color: isDark ? Colors.grey.shade600 : Colors.grey.shade300),
+          const SizedBox(height: 12),
+          Text(msg, textAlign: TextAlign.center, style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 14, fontWeight: FontWeight.w500)),
+        ],
+      )
+    );
+  }
 
   Widget _cardWrapper(Widget child) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 2)),
+          if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 2)),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
       ),
       child: child,
     );
@@ -183,24 +191,24 @@ class _StudentBkPageState extends State<StudentBkPage> {
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           title: Row(children: [
-            Expanded(child: Text(c['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+            Expanded(child: Text(c['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.isDark(context) ? Colors.white : Colors.black87))),
             if (c['isConfidential'] == true) Icon(Icons.lock, size: 16, color: Colors.grey.shade400),
           ]),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 6),
             child: Row(
               children: [
-                Icon(Icons.label_outline, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.label_outline, size: 14, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text('${typeLabel[c['type']] ?? c['type']}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('${typeLabel[c['type']] ?? c['type']}', style: TextStyle(fontSize: 12, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade600)),
                 const SizedBox(width: 12),
-                Icon(Icons.info_outline, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.info_outline, size: 14, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text('${statusLabel[c['status']] ?? c['status']}', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                Text('${statusLabel[c['status']] ?? c['status']}', style: TextStyle(fontSize: 12, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade600)),
               ],
             ),
           ),
-          trailing: Text(_fmt(c['sessionDate']), style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+          trailing: Text(_fmt(c['sessionDate']), style: TextStyle(fontSize: 12, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade500, fontWeight: FontWeight.w500)),
         ),
       )).toList(),
     );
@@ -213,16 +221,16 @@ class _StudentBkPageState extends State<StudentBkPage> {
       children: items.map((v) => _cardWrapper(
         ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          title: Text(v['typeName'] ?? v['description'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          title: Text(v['typeName'] ?? v['description'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.isDark(context) ? Colors.white : Colors.black87)),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Text('${v['description'] ?? ''}\n${_fmt(v['date'])}', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+            child: Text('${v['description'] ?? ''}\n${_fmt(v['date'])}', style: TextStyle(fontSize: 13, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade600)),
           ),
           isThreeLine: true,
           trailing: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
-            child: Text('${v['points']}', style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold, fontSize: 16)),
+            decoration: BoxDecoration(color: AppTheme.isDark(context) ? Colors.red.shade900.withAlpha(100) : Colors.red.shade50, borderRadius: BorderRadius.circular(8)),
+            child: Text('${v['points']}', style: TextStyle(color: AppTheme.isDark(context) ? Colors.red.shade400 : Colors.red.shade700, fontWeight: FontWeight.bold, fontSize: 16)),
           ),
         ),
       )).toList(),
@@ -238,15 +246,15 @@ class _StudentBkPageState extends State<StudentBkPage> {
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Container(
             padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
-            child: Icon(Icons.emoji_events, color: Colors.green.shade600),
+            decoration: BoxDecoration(color: AppTheme.isDark(context) ? Colors.green.shade900.withAlpha(100) : Colors.green.shade50, borderRadius: BorderRadius.circular(12)),
+            child: Icon(Icons.emoji_events, color: AppTheme.isDark(context) ? Colors.green.shade400 : Colors.green.shade600),
           ),
-          title: Text(a['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+          title: Text(a['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.isDark(context) ? Colors.white : Colors.black87)),
           subtitle: Padding(
             padding: const EdgeInsets.only(top: 4),
-            child: Text('${a['level'] ?? '-'} · ${_fmt(a['date'])}', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+            child: Text('${a['level'] ?? '-'} · ${_fmt(a['date'])}', style: TextStyle(fontSize: 13, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade600)),
           ),
-          trailing: Text('+${a['points']}', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 16)),
+          trailing: Text('+${a['points']}', style: TextStyle(color: AppTheme.isDark(context) ? Colors.green.shade400 : Colors.green.shade700, fontWeight: FontWeight.bold, fontSize: 16)),
         ),
       )).toList(),
     );
@@ -264,29 +272,29 @@ class _StudentBkPageState extends State<StudentBkPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(children: [
-                Expanded(child: Text(r['topic'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+                Expanded(child: Text(r['topic'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.isDark(context) ? Colors.white : Colors.black87))),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
-                  child: Text(statusLabel[r['status']] ?? r['status'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.orange.shade700)),
+                  decoration: BoxDecoration(color: AppTheme.isDark(context) ? Colors.orange.shade900.withAlpha(100) : Colors.orange.shade50, borderRadius: BorderRadius.circular(8)),
+                  child: Text(statusLabel[r['status']] ?? r['status'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppTheme.isDark(context) ? Colors.orange.shade400 : Colors.orange.shade700)),
                 ),
               ]),
               if ((r['description'] ?? '').toString().isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(r['description'], style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                Text(r['description'], style: TextStyle(fontSize: 13, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade600)),
               ],
               if ((r['response'] ?? '').toString().isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: AppTheme.isDark(context) ? Colors.blue.shade900.withAlpha(100) : Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Icon(Icons.reply, size: 16, color: Colors.blue.shade700),
+                      Icon(Icons.reply, size: 16, color: AppTheme.isDark(context) ? Colors.blue.shade400 : Colors.blue.shade700),
                       const SizedBox(width: 8),
-                      Expanded(child: Text('${r['response']}', style: TextStyle(fontSize: 13, color: Colors.blue.shade800))),
+                      Expanded(child: Text('${r['response']}', style: TextStyle(fontSize: 13, color: AppTheme.isDark(context) ? Colors.blue.shade200 : Colors.blue.shade800))),
                     ],
                   ),
                 ),
@@ -294,9 +302,9 @@ class _StudentBkPageState extends State<StudentBkPage> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  Icon(Icons.access_time, size: 12, color: Colors.grey.shade400),
+                  Icon(Icons.access_time, size: 12, color: AppTheme.isDark(context) ? Colors.grey.shade500 : Colors.grey.shade400),
                   const SizedBox(width: 4),
-                  Text('Diajukan ${_fmt(r['createdAt'])}', style: TextStyle(fontSize: 11, color: Colors.grey.shade500)),
+                  Text('Diajukan ${_fmt(r['createdAt'])}', style: TextStyle(fontSize: 11, color: AppTheme.isDark(context) ? Colors.grey.shade500 : Colors.grey.shade500)),
                 ],
               ),
             ],
@@ -320,17 +328,17 @@ class _StudentBkPageState extends State<StudentBkPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(s['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                    Text(s['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.isDark(context) ? Colors.white : Colors.black87)),
                     if ((s['description'] ?? '').toString().isNotEmpty) ...[
                       const SizedBox(height: 6),
-                      Text(s['description'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                      Text(s['description'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 13, color: AppTheme.isDark(context) ? Colors.grey.shade400 : Colors.grey.shade600)),
                     ],
                     const SizedBox(height: 8),
                     Row(
                       children: [
-                        Icon(Icons.quiz_outlined, size: 14, color: Colors.grey.shade500),
+                        Icon(Icons.quiz_outlined, size: 14, color: AppTheme.isDark(context) ? Colors.grey.shade500 : Colors.grey.shade500),
                         const SizedBox(width: 4),
-                        Text('${s['questionCount'] ?? 0} pertanyaan', style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                        Text('${s['questionCount'] ?? 0} pertanyaan', style: TextStyle(fontSize: 12, color: AppTheme.isDark(context) ? Colors.grey.shade500 : Colors.grey.shade500)),
                       ],
                     ),
                   ],
@@ -340,12 +348,12 @@ class _StudentBkPageState extends State<StudentBkPage> {
               if (s['answered'] == true)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: AppTheme.isDark(context) ? Colors.green.shade900.withAlpha(100) : Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
                   child: Row(
                     children: [
-                      Icon(Icons.check, size: 14, color: Colors.green.shade700),
+                      Icon(Icons.check, size: 14, color: AppTheme.isDark(context) ? Colors.green.shade400 : Colors.green.shade700),
                       const SizedBox(width: 4),
-                      Text('Selesai', style: TextStyle(color: Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
+                      Text('Selesai', style: TextStyle(color: AppTheme.isDark(context) ? Colors.green.shade400 : Colors.green.shade700, fontSize: 12, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 )

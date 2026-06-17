@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme.dart';
+import '../../../../core/network/api_client.dart';
 import '../../../../core/network/api_client.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
@@ -33,11 +35,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Ujian Saya', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: Text('Ujian Saya', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
       ),
       body: _loading
@@ -50,7 +53,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
               children: [
                 // Filter chips
                 Container(
-                  color: Colors.white,
+                  color: isDark ? const Color(0xFF1E293B) : Colors.white,
                   height: 60,
                   child: ListView(
                     scrollDirection: Axis.horizontal,
@@ -71,9 +74,9 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.assignment_turned_in_outlined, size: 48, color: Colors.grey.shade300),
+                            Icon(Icons.assignment_turned_in_outlined, size: 48, color: isDark ? Colors.grey.shade600 : Colors.grey.shade300),
                             const SizedBox(height: 12),
-                            Text('Belum ada ujian', style: TextStyle(color: Colors.grey.shade500, fontSize: 14, fontWeight: FontWeight.w500)),
+                            Text('Belum ada ujian', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 14, fontWeight: FontWeight.w500)),
                           ],
                         ),
                       )
@@ -90,6 +93,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Widget _chip(String val, String label) {
+    final isDark = AppTheme.isDark(context);
     final sel = _filter == val;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
@@ -99,16 +103,16 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
           label: Text(label, style: TextStyle(
             fontSize: 13, 
             fontWeight: sel ? FontWeight.bold : FontWeight.w500,
-            color: sel ? Colors.white : Colors.grey.shade700,
+            color: sel ? Colors.white : (isDark ? Colors.grey.shade400 : Colors.grey.shade700),
           )),
           selected: sel,
           onSelected: (_) => setState(() => _filter = val),
           selectedColor: studentPrimaryColor,
-          backgroundColor: Colors.grey.shade100,
+          backgroundColor: isDark ? Colors.white.withAlpha(10) : Colors.grey.shade100,
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(20),
-            side: BorderSide(color: sel ? studentPrimaryColor : Colors.grey.shade200),
+            side: BorderSide(color: sel ? studentPrimaryColor : (isDark ? Colors.transparent : Colors.grey.shade200)),
           ),
           elevation: sel ? 2 : 0,
           showCheckmark: false,
@@ -118,6 +122,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
   }
 
   Widget _examCard(dynamic e) {
+    final isDark = AppTheme.isDark(context);
     final attempt = e['attempt'];
     final isDone = attempt != null && (attempt['status'] == 'SUBMITTED' || attempt['status'] == 'AUTO_SUBMITTED');
     final now = DateTime.now();
@@ -128,12 +133,12 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
+          if (!isDark) BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -143,26 +148,26 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
             Row(children: [
               _typeBadge(e['examType']),
               const SizedBox(width: 8),
-              Expanded(child: Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), overflow: TextOverflow.ellipsis)),
+              Expanded(child: Text(e['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87), overflow: TextOverflow.ellipsis)),
             ]),
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.menu_book, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.menu_book, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text(e['subject']?['name'] ?? '', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text(e['subject']?['name'] ?? '', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13)),
                 const SizedBox(width: 12),
-                Icon(Icons.quiz, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.quiz, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text('${e['questionCount'] ?? 0} soal', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text('${e['questionCount'] ?? 0} soal', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13)),
               ],
             ),
             const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.timer, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.timer, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text('${e['durationMinutes']} mnt', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text('${e['durationMinutes']} mnt', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13)),
               ],
             ),
             const SizedBox(height: 16),
@@ -195,9 +200,10 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
                 style: OutlinedButton.styleFrom(
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   padding: const EdgeInsets.symmetric(vertical: 12),
-                  backgroundColor: Colors.grey.shade100,
+                  backgroundColor: isDark ? Colors.white.withAlpha(10) : Colors.grey.shade100,
+                  side: isDark ? BorderSide.none : null,
                 ),
-                child: Text(now.isBefore(start) ? 'Belum Dimulai' : 'Waktu Habis', style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
+                child: Text(now.isBefore(start) ? 'Belum Dimulai' : 'Waktu Habis', style: TextStyle(color: isDark ? Colors.grey.shade500 : Colors.grey.shade500, fontWeight: FontWeight.bold)),
               )),
           ],
         ),

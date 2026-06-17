@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
+import '../../../core/providers/theme_provider.dart';
 
 const teacherPrimaryColor = Color(0xFF1D4ED8); // Blue 700
 const teacherGradient = LinearGradient(
@@ -9,13 +12,13 @@ const teacherGradient = LinearGradient(
   end: Alignment.bottomRight,
 );
 
-class TeacherDashboardPage extends StatefulWidget {
+class TeacherDashboardPage extends ConsumerStatefulWidget {
   const TeacherDashboardPage({super.key});
   @override
-  State<TeacherDashboardPage> createState() => _TeacherDashboardPageState();
+  ConsumerState<TeacherDashboardPage> createState() => _TeacherDashboardPageState();
 }
 
-class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
+class _TeacherDashboardPageState extends ConsumerState<TeacherDashboardPage> {
   Map<String, dynamic>? _data;
   Map<String, dynamic>? _user;
   bool _loading = true;
@@ -40,14 +43,21 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('SI Hutama - Guru', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: Text('SI Hutama - Guru', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.logout, color: Colors.black87), onPressed: () async {
+          IconButton(
+            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode, color: isDark ? Colors.orange.shade300 : Colors.grey.shade700),
+            onPressed: () {
+              ref.read(themeProvider.notifier).toggleTheme();
+            },
+          ),
+          IconButton(icon: Icon(Icons.logout, color: isDark ? Colors.white : Colors.black87), onPressed: () async {
             final router = GoRouter.of(context);
             await ApiClient().clearToken();
             router.go('/login');
@@ -115,11 +125,11 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(color: teacherPrimaryColor.withAlpha(30), borderRadius: BorderRadius.circular(8)),
-                      child: const Icon(Icons.grid_view_rounded, size: 18, color: teacherPrimaryColor),
+                      decoration: BoxDecoration(color: isDark ? teacherPrimaryColor.withAlpha(50) : teacherPrimaryColor.withAlpha(30), borderRadius: BorderRadius.circular(8)),
+                      child: Icon(Icons.grid_view_rounded, size: 18, color: isDark ? Colors.blue.shade300 : teacherPrimaryColor),
                     ),
                     const SizedBox(width: 12),
-                    const Text('Aksi Cepat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                    Text('Aksi Cepat', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
                   ],
                 ),
                 const SizedBox(height: 16),
@@ -134,14 +144,15 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
   }
 
   Widget _statCard(String label, String value, IconData icon, MaterialColor color) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
+          if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
       ),
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -153,45 +164,46 @@ class _TeacherDashboardPageState extends State<TeacherDashboardPage> {
             children: [
               Container(
                 padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(color: color.shade50, borderRadius: BorderRadius.circular(10)),
-                child: Icon(icon, color: color.shade600, size: 20),
+                decoration: BoxDecoration(color: isDark ? color.shade900.withAlpha(100) : color.shade50, borderRadius: BorderRadius.circular(10)),
+                child: Icon(icon, color: isDark ? color.shade300 : color.shade600, size: 20),
               ),
-              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.grey.shade800)),
+              Text(value, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.grey.shade800)),
             ],
           ),
-          Text(label, style: TextStyle(fontSize: 13, color: Colors.grey.shade600, fontWeight: FontWeight.w600)),
+          Text(label, style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontWeight: FontWeight.w600)),
         ],
       ),
     );
   }
 
   Widget _menuItem(IconData icon, String title, String sub, VoidCallback onTap) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 2)),
+          if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 2)),
         ],
-        border: Border.all(color: Colors.grey.shade100),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           width: 48, height: 48,
-          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
-          child: Icon(icon, color: teacherPrimaryColor, size: 24),
+          decoration: BoxDecoration(color: isDark ? Colors.blue.shade900.withAlpha(100) : Colors.blue.shade50, borderRadius: BorderRadius.circular(12)),
+          child: Icon(icon, color: isDark ? Colors.blue.shade300 : teacherPrimaryColor, size: 24),
         ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: isDark ? Colors.white : Colors.black87)),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Text(sub, style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+          child: Text(sub, style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
         ),
         trailing: Container(
           padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(color: Colors.grey.shade50, shape: BoxShape.circle),
-          child: Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey.shade400),
+          decoration: BoxDecoration(color: isDark ? Colors.white.withAlpha(10) : Colors.grey.shade50, shape: BoxShape.circle),
+          child: Icon(Icons.arrow_forward_ios, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade400),
         ),
         onTap: onTap,
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 
 const teacherPrimaryColor = Color(0xFF1D4ED8); // Blue 700
@@ -27,11 +28,12 @@ class _QuestionsPageState extends State<QuestionsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Bank Soal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: Text('Bank Soal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
       ),
       body: _loading
@@ -44,9 +46,9 @@ class _QuestionsPageState extends State<QuestionsPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.quiz_outlined, size: 64, color: Colors.grey.shade300),
+                      Icon(Icons.quiz_outlined, size: 64, color: isDark ? Colors.grey.shade600 : Colors.grey.shade300),
                       const SizedBox(height: 16),
-                      Text('Belum ada soal', style: TextStyle(color: Colors.grey.shade500, fontSize: 16, fontWeight: FontWeight.w500)),
+                      Text('Belum ada soal', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 16, fontWeight: FontWeight.w500)),
                     ],
                   ),
                 )
@@ -58,12 +60,12 @@ class _QuestionsPageState extends State<QuestionsPage> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
+                          if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
                         ],
-                        border: Border.all(color: Colors.grey.shade100),
+                        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -75,13 +77,13 @@ class _QuestionsPageState extends State<QuestionsPage> {
                               children: [
                                 Container(
                                   width: 32, height: 32,
-                                  decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
-                                  child: Center(child: Text('${i + 1}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.blue.shade700))),
+                                  decoration: BoxDecoration(color: isDark ? Colors.blue.shade900.withAlpha(100) : Colors.blue.shade50, borderRadius: BorderRadius.circular(8)),
+                                  child: Center(child: Text('${i + 1}', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: isDark ? Colors.blue.shade300 : Colors.blue.shade700))),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
                                   child: Text(q['questionText'] ?? '', maxLines: 3, overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14, height: 1.4, color: Colors.black87)),
+                                    style: TextStyle(fontSize: 14, height: 1.4, color: isDark ? Colors.white : Colors.black87)),
                                 ),
                               ],
                             ),
@@ -106,14 +108,15 @@ class _QuestionsPageState extends State<QuestionsPage> {
   }
 
   Widget _badge(String text, MaterialColor c) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: c.shade50, 
+        color: isDark ? c.shade900.withAlpha(100) : c.shade50, 
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: c.shade100)
+        border: Border.all(color: isDark ? c.shade900.withAlpha(50) : c.shade100)
       ),
-      child: Text(text, style: TextStyle(fontSize: 11, color: c.shade700, fontWeight: FontWeight.bold)),
+      child: Text(text, style: TextStyle(fontSize: 11, color: isDark ? c.shade300 : c.shade700, fontWeight: FontWeight.bold)),
     );
   }
 }

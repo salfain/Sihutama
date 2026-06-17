@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 import 'package:intl/intl.dart';
 
@@ -60,29 +61,30 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       body: Column(
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
             decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
+              boxShadow: [if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
               borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Konseling', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: -0.5)),
+                Text('Konseling', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1E293B), letterSpacing: -0.5)),
                 const SizedBox(height: 16),
                 Container(
-                  decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
+                  decoration: BoxDecoration(color: isDark ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(12)),
                   child: TabBar(
                     controller: _tabs,
                     indicator: BoxDecoration(color: counselorColor, borderRadius: BorderRadius.circular(12)),
                     labelColor: Colors.white,
-                    unselectedLabelColor: Colors.grey.shade600,
+                    unselectedLabelColor: isDark ? Colors.grey.shade400 : Colors.grey.shade600,
                     labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                     indicatorSize: TabBarIndicatorSize.tab,
                     dividerColor: Colors.transparent,
@@ -113,6 +115,7 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
   }
 
   Widget _buildRequests() {
+    final isDark = AppTheme.isDark(context);
     if (_requests.isEmpty) return _empty('Belum ada permohonan masuk.', Icons.inbox_rounded);
     return RefreshIndicator(
       onRefresh: _load,
@@ -127,9 +130,10 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+              border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -138,48 +142,48 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                 children: [
                   Row(
                     children: [
-                      Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.mark_email_unread_rounded, color: counselorColor, size: 20)),
+                      Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: isDark ? Colors.purple.shade900.withAlpha(100) : const Color(0xFFF1F5F9), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.mark_email_unread_rounded, color: counselorColor, size: 20)),
                       const SizedBox(width: 12),
-                      Expanded(child: Text(r['topic'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1E293B)))),
+                      Expanded(child: Text(r['topic'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : const Color(0xFF1E293B)))),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(color: statusColor.withAlpha(20), borderRadius: BorderRadius.circular(20)),
-                        child: Text(_reqStatusLabel[r['status']] ?? r['status'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: statusColor)),
+                        decoration: BoxDecoration(color: isDark ? statusColor.withAlpha(50) : statusColor.withAlpha(20), borderRadius: BorderRadius.circular(20)),
+                        child: Text(_reqStatusLabel[r['status']] ?? r['status'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? statusColor.shade300 : statusColor)),
                       ),
                     ],
                   ),
-                  const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1, color: Color(0xFFF1F5F9))),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1, color: isDark ? Colors.white.withAlpha(20) : const Color(0xFFF1F5F9))),
                   Row(
                     children: [
-                      Icon(Icons.person_outline_rounded, size: 14, color: Colors.grey.shade500),
+                      Icon(Icons.person_outline_rounded, size: 14, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text('${r['studentName']} · ${r['className']}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700, fontWeight: FontWeight.w500)),
+                      Text('${r['studentName']} · ${r['className']}', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700, fontWeight: FontWeight.w500)),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(Icons.warning_amber_rounded, size: 14, color: Colors.grey.shade500),
+                      Icon(Icons.warning_amber_rounded, size: 14, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text('Urgensi: ${r['urgency']}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                      Text('Urgensi: ${r['urgency']}', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade700)),
                     ],
                   ),
                   if ((r['description'] ?? '').toString().isNotEmpty) ...[
                     const SizedBox(height: 12),
-                    Text(r['description'], style: TextStyle(fontSize: 13, color: Colors.grey.shade600, height: 1.4)),
+                    Text(r['description'], style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, height: 1.4)),
                   ],
                   if ((r['response'] ?? '').toString().isNotEmpty) ...[
                     const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(color: const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey.shade200)),
+                      decoration: BoxDecoration(color: isDark ? Colors.white.withAlpha(10) : const Color(0xFFF8FAFC), borderRadius: BorderRadius.circular(12), border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200)),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const Text('Tanggapan Anda:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey)),
                           const SizedBox(height: 4),
-                          Text(r['response'], style: const TextStyle(fontSize: 13, color: counselorColor, fontWeight: FontWeight.w500)),
+                          Text(r['response'], style: TextStyle(fontSize: 13, color: isDark ? Colors.purple.shade300 : counselorColor, fontWeight: FontWeight.w500)),
                         ],
                       ),
                     ),
@@ -191,7 +195,7 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                       onPressed: () => _respond(r),
                       icon: const Icon(Icons.reply_rounded, size: 16),
                       label: const Text('Tanggapi'),
-                      style: OutlinedButton.styleFrom(foregroundColor: counselorColor, side: const BorderSide(color: counselorColor), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      style: OutlinedButton.styleFrom(foregroundColor: isDark ? Colors.purple.shade300 : counselorColor, side: BorderSide(color: isDark ? Colors.purple.shade300 : counselorColor), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                     ),
                   ),
                 ],
@@ -204,6 +208,7 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
   }
 
   Widget _buildCases() {
+    final isDark = AppTheme.isDark(context);
     if (_cases.isEmpty) return _empty('Belum ada sesi konseling berjalan.', Icons.forum_rounded);
     return RefreshIndicator(
       onRefresh: _load,
@@ -216,9 +221,10 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               borderRadius: BorderRadius.circular(20),
-              boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+              boxShadow: [if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+              border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -227,41 +233,41 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                 children: [
                   Row(
                     children: [
-                      Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: const Color(0xFFF3E8FF), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.support_agent_rounded, color: counselorColor, size: 20)),
+                      Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: isDark ? Colors.purple.shade900.withAlpha(100) : const Color(0xFFF3E8FF), borderRadius: BorderRadius.circular(10)), child: const Icon(Icons.support_agent_rounded, color: counselorColor, size: 20)),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Row(
                           children: [
-                            Flexible(child: Text(c['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1E293B)))),
+                            Flexible(child: Text(c['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : const Color(0xFF1E293B)))),
                             if (c['isConfidential'] == true) ...[const SizedBox(width: 6), const Icon(Icons.lock_rounded, size: 14, color: Colors.grey)],
                           ],
                         ),
                       ),
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
-                        child: Text(_caseStatusLabel[c['status']] ?? c['status'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey.shade700)),
+                        decoration: BoxDecoration(color: isDark ? Colors.white.withAlpha(10) : Colors.grey.shade100, borderRadius: BorderRadius.circular(20)),
+                        child: Text(_caseStatusLabel[c['status']] ?? c['status'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700)),
                       ),
                     ],
                   ),
-                  const Padding(padding: EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1, color: Color(0xFFF1F5F9))),
+                  Padding(padding: const EdgeInsets.symmetric(vertical: 12), child: Divider(height: 1, color: isDark ? Colors.white.withAlpha(20) : const Color(0xFFF1F5F9))),
                   Row(
                     children: [
-                      Icon(Icons.person_outline_rounded, size: 14, color: Colors.grey.shade500),
+                      Icon(Icons.person_outline_rounded, size: 14, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text('${c['studentName']} · ${c['className']}', style: TextStyle(fontSize: 13, color: Colors.grey.shade700, fontWeight: FontWeight.w500)),
+                      Text('${c['studentName']} · ${c['className']}', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700, fontWeight: FontWeight.w500)),
                     ],
                   ),
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.category_rounded, size: 14, color: Colors.grey.shade500),
+                      Icon(Icons.category_rounded, size: 14, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text(_typeLabel[c['type']] ?? c['type'], style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                      Text(_typeLabel[c['type']] ?? c['type'], style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700)),
                       const SizedBox(width: 16),
-                      Icon(Icons.calendar_today_rounded, size: 14, color: Colors.grey.shade500),
+                      Icon(Icons.calendar_today_rounded, size: 14, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500),
                       const SizedBox(width: 4),
-                      Text(_fmt(c['sessionDate']), style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                      Text(_fmt(c['sessionDate']), style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade300 : Colors.grey.shade700)),
                     ],
                   ),
                 ],
@@ -317,8 +323,11 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                   const SizedBox(height: 24),
                   DropdownButtonFormField<String>(
                     value: status,
+                    dropdownColor: Colors.white,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: 'Status',
+                      labelStyle: const TextStyle(color: Colors.black54),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -330,8 +339,10 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                   TextField(
                     controller: responseCtrl,
                     maxLines: 3,
+                    style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
                       labelText: 'Tanggapan untuk siswa',
+                      labelStyle: const TextStyle(color: Colors.black54),
                       filled: true,
                       fillColor: const Color(0xFFF8FAFC),
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),

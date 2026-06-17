@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme.dart';
 
 class ExamFinishPage extends StatelessWidget {
   final String examId;
@@ -7,7 +8,9 @@ class ExamFinishPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -17,15 +20,15 @@ class ExamFinishPage extends StatelessWidget {
               Container(
                 width: 80, height: 80,
                 decoration: BoxDecoration(
-                  color: Colors.green[100],
+                  color: isDark ? Colors.green.shade900.withAlpha(100) : Colors.green[100],
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.check_circle, size: 48, color: Colors.green[700]),
+                child: Icon(Icons.check_circle, size: 48, color: isDark ? Colors.green.shade400 : Colors.green[700]),
               ),
               const SizedBox(height: 24),
-              const Text('Ujian Selesai!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+              Text('Ujian Selesai!', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
               const SizedBox(height: 8),
-              Text('Jawaban Anda telah terkirim.', style: TextStyle(color: Colors.grey[600])),
+              Text('Jawaban Anda telah terkirim.', style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600])),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,

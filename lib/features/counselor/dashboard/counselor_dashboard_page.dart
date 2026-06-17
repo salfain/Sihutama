@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 
 const counselorColor = Color(0xFF6D28D9); // Lebih premium/gelap dari sebelumnya
@@ -44,11 +45,12 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     const typeLabel = {'PRIBADI': 'Pribadi', 'SOSIAL': 'Sosial', 'BELAJAR': 'Belajar', 'KARIR': 'Karir'};
     final recent = (_data?['recentCases'] as List?) ?? [];
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       body: _loading
           ? const Center(child: CircularProgressIndicator(color: counselorColor))
           : RefreshIndicator(
@@ -121,7 +123,7 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Ringkasan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF1E293B), letterSpacing: -0.5)),
+                        Text('Ringkasan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDark ? Colors.white : const Color(0xFF1E293B), letterSpacing: -0.5)),
                         const SizedBox(height: 16),
                         GridView.count(
                           crossAxisCount: 2,
@@ -149,27 +151,28 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.history_rounded, size: 22, color: counselorColor),
-                            SizedBox(width: 8),
-                            Text('Sesi Konseling Terbaru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Color(0xFF1E293B), letterSpacing: -0.5)),
+                            const Icon(Icons.history_rounded, size: 22, color: counselorColor),
+                            const SizedBox(width: 8),
+                            Text('Sesi Konseling Terbaru', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDark ? Colors.white : const Color(0xFF1E293B), letterSpacing: -0.5)),
                           ],
                         ),
                         const SizedBox(height: 16),
                         if (recent.isEmpty)
                           Container(
                             padding: const EdgeInsets.all(24),
-                            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: Colors.grey.shade200)),
-                            child: const Center(child: Text('Belum ada sesi konseling.', style: TextStyle(color: Colors.grey, fontSize: 14))),
+                            decoration: BoxDecoration(color: isDark ? const Color(0xFF1E293B) : Colors.white, borderRadius: BorderRadius.circular(20), border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200)),
+                            child: Center(child: Text('Belum ada sesi konseling.', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey, fontSize: 14))),
                           )
                         else
                           ...recent.map((c) => Container(
                             margin: const EdgeInsets.only(bottom: 12),
                             decoration: BoxDecoration(
-                              color: Colors.white,
+                              color: isDark ? const Color(0xFF1E293B) : Colors.white,
                               borderRadius: BorderRadius.circular(20),
-                              boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+                              boxShadow: [if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+                              border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent),
                             ),
                             child: Material(
                               color: Colors.transparent,
@@ -191,16 +194,16 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(c['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: Color(0xFF1E293B))),
+                                            Text(c['title'] ?? '', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: isDark ? Colors.white : const Color(0xFF1E293B))),
                                             const SizedBox(height: 4),
-                                            Text('${c['studentName']} · ${c['className']}', style: TextStyle(fontSize: 13, color: Colors.grey[600], fontWeight: FontWeight.w500)),
+                                            Text('${c['studentName']} · ${c['className']}', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[400] : Colors.grey[600], fontWeight: FontWeight.w500)),
                                           ],
                                         ),
                                       ),
                                       Container(
                                         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(20)),
-                                        child: Text(typeLabel[c['type']] ?? c['type'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.grey[700])),
+                                        decoration: BoxDecoration(color: isDark ? Colors.white.withAlpha(10) : Colors.grey[100], borderRadius: BorderRadius.circular(20)),
+                                        child: Text(typeLabel[c['type']] ?? c['type'], style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: isDark ? Colors.grey[300] : Colors.grey[700])),
                                       ),
                                     ],
                                   ),
@@ -218,6 +221,7 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
   }
 
   Widget _actionBtn(BuildContext context, String label, IconData icon, MaterialColor color, VoidCallback onTap) {
+    final isDark = AppTheme.isDark(context);
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -225,26 +229,29 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? const Color(0xFF1E293B) : Colors.white,
               shape: BoxShape.circle,
-              boxShadow: [BoxShadow(color: color.withAlpha(20), blurRadius: 16, offset: const Offset(0, 4))],
+              boxShadow: [if (!isDark) BoxShadow(color: color.withAlpha(20), blurRadius: 16, offset: const Offset(0, 4))],
+              border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent),
             ),
-            child: Icon(icon, color: color[600], size: 28),
+            child: Icon(icon, color: isDark ? color.shade300 : color[600], size: 28),
           ),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF475569))),
+          Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: isDark ? Colors.grey.shade400 : const Color(0xFF475569))),
         ],
       ),
     );
   }
 
   Widget _stat(String label, dynamic value, IconData icon, MaterialColor color) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+        boxShadow: [if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -252,12 +259,12 @@ class _CounselorDashboardPageState extends State<CounselorDashboardPage> {
         children: [
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color[50], borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, color: color[600], size: 20),
+            decoration: BoxDecoration(color: isDark ? color.shade900.withAlpha(100) : color[50], borderRadius: BorderRadius.circular(10)),
+            child: Icon(icon, color: isDark ? color.shade300 : color[600], size: 20),
           ),
           const Spacer(),
-          Text('$value', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
-          Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF64748B), fontWeight: FontWeight.w500)),
+          Text('$value', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: isDark ? Colors.white : const Color(0xFF1E293B))),
+          Text(label, style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : const Color(0xFF64748B), fontWeight: FontWeight.w500)),
         ],
       ),
     );
@@ -374,8 +381,11 @@ class _FormSheetState extends State<_FormSheet> {
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
                 value: _selectedStudentId,
+                dropdownColor: Colors.white,
+                style: const TextStyle(color: Colors.black87),
                 decoration: InputDecoration(
                   labelText: 'Siswa *',
+                  labelStyle: const TextStyle(color: Colors.black54),
                   filled: true,
                   fillColor: const Color(0xFFF8FAFC),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
@@ -390,8 +400,10 @@ class _FormSheetState extends State<_FormSheet> {
                 child: TextField(
                   controller: _ctrls[i],
                   keyboardType: widget.fields[i].toLowerCase() == 'poin' ? TextInputType.number : TextInputType.text,
+                  style: const TextStyle(color: Colors.black87),
                   decoration: InputDecoration(
                     labelText: widget.fields[i] + (i == 0 ? ' *' : ''),
+                    labelStyle: const TextStyle(color: Colors.black54),
                     filled: true,
                     fillColor: const Color(0xFFF8FAFC),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),

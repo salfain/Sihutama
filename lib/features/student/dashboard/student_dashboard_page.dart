@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/network/api_client.dart';
+import '../../../core/providers/theme_provider.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
@@ -9,13 +13,13 @@ const studentGradient = LinearGradient(
   end: Alignment.bottomRight,
 );
 
-class StudentDashboardPage extends StatefulWidget {
+class StudentDashboardPage extends ConsumerStatefulWidget {
   const StudentDashboardPage({super.key});
   @override
-  State<StudentDashboardPage> createState() => _StudentDashboardPageState();
+  ConsumerState<StudentDashboardPage> createState() => _StudentDashboardPageState();
 }
 
-class _StudentDashboardPageState extends State<StudentDashboardPage> {
+class _StudentDashboardPageState extends ConsumerState<StudentDashboardPage> {
   Map<String, dynamic>? _data;
   Map<String, dynamic>? _user;
   bool _loading = true;
@@ -43,15 +47,24 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
+    final themeMode = ref.watch(themeProvider);
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('SI Hutama - Siswa', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
-        backgroundColor: Colors.white,
+        title: Text('SI Hutama - Siswa', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.black87),
+            icon: Icon(themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode, color: isDark ? Colors.amber : Colors.grey.shade700),
+            onPressed: () {
+              ref.read(themeProvider.notifier).toggle();
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.logout, color: isDark ? Colors.grey.shade300 : Colors.black87),
             onPressed: () async {
               final router = GoRouter.of(context);
               await ApiClient().clearToken();
@@ -139,48 +152,52 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   }
 
   Widget _sectionTitle(String title, IconData icon) {
+    final isDark = AppTheme.isDark(context);
     return Row(children: [
       Container(
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
-          color: studentPrimaryColor.withAlpha(30),
+          color: studentPrimaryColor.withAlpha(isDark ? 50 : 30),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(icon, size: 18, color: studentPrimaryColor),
       ),
       const SizedBox(width: 12),
-      Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+      Text(title, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
     ]);
   }
 
   Widget _emptyState(String message) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200),
       ),
       child: Column(
         children: [
-          Icon(Icons.inbox_rounded, size: 40, color: Colors.grey.shade300),
+          Icon(Icons.inbox_rounded, size: 40, color: isDark ? Colors.grey.shade600 : Colors.grey.shade300),
           const SizedBox(height: 12),
-          Text(message, style: TextStyle(color: Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)),
+          Text(message, style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 13, fontWeight: FontWeight.w500)),
         ],
       ),
     );
   }
 
   Widget _examCard(dynamic e, bool showButton) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
+          if (!isDark) BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 10, offset: const Offset(0, 4)),
         ],
+        border: isDark ? Border.all(color: Colors.white.withAlpha(20)) : null,
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -191,31 +208,31 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
               children: [
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
+                  decoration: BoxDecoration(color: isDark ? Colors.green.shade900.withAlpha(100) : Colors.green.shade50, borderRadius: BorderRadius.circular(8)),
                   child: Row(
                     children: [
-                      Container(width: 6, height: 6, decoration: BoxDecoration(color: Colors.green.shade600, shape: BoxShape.circle)),
+                      Container(width: 6, height: 6, decoration: BoxDecoration(color: isDark ? Colors.green.shade400 : Colors.green.shade600, shape: BoxShape.circle)),
                       const SizedBox(width: 6),
-                      Text('Tersedia', style: TextStyle(color: Colors.green.shade700, fontSize: 11, fontWeight: FontWeight.bold)),
+                      Text('Tersedia', style: TextStyle(color: isDark ? Colors.green.shade400 : Colors.green.shade700, fontSize: 11, fontWeight: FontWeight.bold)),
                     ],
                   ),
                 ),
                 const Spacer(),
-                Text(e['subject']?['code'] ?? '', style: TextStyle(color: Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w600)),
+                Text(e['subject']?['code'] ?? '', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 12, fontWeight: FontWeight.w600)),
               ],
             ),
             const SizedBox(height: 12),
-            Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+            Text(e['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
             const SizedBox(height: 6),
             Row(
               children: [
-                Icon(Icons.menu_book, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.menu_book, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text(e['subject']?['name'] ?? '', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text(e['subject']?['name'] ?? '', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13)),
                 const SizedBox(width: 12),
-                Icon(Icons.timer, size: 14, color: Colors.grey.shade500),
+                Icon(Icons.timer, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                 const SizedBox(width: 4),
-                Text('${e['durationMinutes'] ?? 0} mnt', style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                Text('${e['durationMinutes'] ?? 0} mnt', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontSize: 13)),
               ],
             ),
             if (showButton) ...[
@@ -242,63 +259,65 @@ class _StudentDashboardPageState extends State<StudentDashboardPage> {
   }
 
   Widget _upcomingItem(dynamic e) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(10)),
-          child: Icon(Icons.lock_clock, color: Colors.blue.shade600, size: 20),
+          decoration: BoxDecoration(color: isDark ? Colors.blue.shade900.withAlpha(100) : Colors.blue.shade50, borderRadius: BorderRadius.circular(10)),
+          child: Icon(Icons.lock_clock, color: isDark ? Colors.blue.shade300 : Colors.blue.shade600, size: 20),
         ),
-        title: Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(e['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isDark ? Colors.white : Colors.black87)),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Text('${e['subject']?['code'] ?? ''} • ${e['durationMinutes'] ?? 0} mnt', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+          child: Text('${e['subject']?['code'] ?? ''} • ${e['durationMinutes'] ?? 0} mnt', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
         ),
       ),
     );
   }
 
   Widget _historyItem(dynamic h) {
+    final isDark = AppTheme.isDark(context);
     final score = h['score'];
     final isGood = (score ?? 0) >= 75;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200),
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         leading: Container(
           padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: Colors.purple.shade50, borderRadius: BorderRadius.circular(10)),
-          child: Icon(Icons.history_edu, color: Colors.purple.shade600, size: 20),
+          decoration: BoxDecoration(color: isDark ? Colors.purple.shade900.withAlpha(100) : Colors.purple.shade50, borderRadius: BorderRadius.circular(10)),
+          child: Icon(Icons.history_edu, color: isDark ? Colors.purple.shade300 : Colors.purple.shade600, size: 20),
         ),
-        title: Text(h['exam']?['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+        title: Text(h['exam']?['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: isDark ? Colors.white : Colors.black87)),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Text(h['exam']?['subject']?['code'] ?? '', style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+          child: Text(h['exam']?['subject']?['code'] ?? '', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isGood ? Colors.green.shade50 : Colors.red.shade50,
+            color: isGood ? (isDark ? Colors.green.shade900.withAlpha(100) : Colors.green.shade50) : (isDark ? Colors.red.shade900.withAlpha(100) : Colors.red.shade50),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
             score != null ? '$score' : '—',
             style: TextStyle(
               fontWeight: FontWeight.bold, fontSize: 16,
-              color: isGood ? Colors.green.shade700 : Colors.red.shade700,
+              color: isGood ? (isDark ? Colors.green.shade400 : Colors.green.shade700) : (isDark ? Colors.red.shade400 : Colors.red.shade700),
             ),
           ),
         ),

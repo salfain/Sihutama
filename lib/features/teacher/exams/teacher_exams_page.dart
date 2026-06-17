@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/utils/exam_utils.dart';
 
@@ -131,11 +132,12 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: const Text('Paket Ujian', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87)),
-        backgroundColor: Colors.white,
+        title: Text('Paket Ujian', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
       ),
       body: _loading
@@ -148,9 +150,9 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.assignment_outlined, size: 64, color: Colors.grey.shade300),
+                      Icon(Icons.assignment_outlined, size: 64, color: isDark ? Colors.grey.shade600 : Colors.grey.shade300),
                       const SizedBox(height: 16),
-                      Text('Belum ada ujian', style: TextStyle(color: Colors.grey.shade500, fontSize: 16, fontWeight: FontWeight.w500)),
+                      Text('Belum ada ujian', style: TextStyle(color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontSize: 16, fontWeight: FontWeight.w500)),
                     ],
                   ),
                 )
@@ -163,12 +165,12 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                     return Container(
                       margin: const EdgeInsets.only(bottom: 16),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: isDark ? const Color(0xFF1E293B) : Colors.white,
                         borderRadius: BorderRadius.circular(16),
                         boxShadow: [
-                          BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
+                          if (!isDark) BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4)),
                         ],
-                        border: Border.all(color: Colors.grey.shade100),
+                        border: Border.all(color: isDark ? Colors.white.withAlpha(20) : Colors.grey.shade100),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(16),
@@ -182,22 +184,22 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                               const Spacer(),
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(color: Colors.grey.shade50, borderRadius: BorderRadius.circular(6)),
-                                child: Text('${e['questionCount'] ?? 0} soal', style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontWeight: FontWeight.bold)),
+                                decoration: BoxDecoration(color: isDark ? Colors.white.withAlpha(10) : Colors.grey.shade50, borderRadius: BorderRadius.circular(6)),
+                                child: Text('${e['questionCount'] ?? 0} soal', style: TextStyle(fontSize: 11, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600, fontWeight: FontWeight.bold)),
                               ),
                             ]),
                             const SizedBox(height: 12),
-                            Text(e['title'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.black87)),
+                            Text(e['title'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isDark ? Colors.white : Colors.black87)),
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                Icon(Icons.menu_book, size: 14, color: Colors.grey.shade500),
+                                Icon(Icons.menu_book, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                                 const SizedBox(width: 4),
-                                Text('${e['subject']?['name'] ?? ''}', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                                Text('${e['subject']?['name'] ?? ''}', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
                                 const SizedBox(width: 12),
-                                Icon(Icons.people_outline, size: 14, color: Colors.grey.shade500),
+                                Icon(Icons.people_outline, size: 14, color: isDark ? Colors.grey.shade500 : Colors.grey.shade500),
                                 const SizedBox(width: 4),
-                                Text('${e['attemptCount'] ?? 0} peserta', style: TextStyle(fontSize: 13, color: Colors.grey.shade600)),
+                                Text('${e['attemptCount'] ?? 0} peserta', style: TextStyle(fontSize: 13, color: isDark ? Colors.grey.shade400 : Colors.grey.shade600)),
                               ],
                             ),
                             const SizedBox(height: 16),
@@ -208,8 +210,8 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                   icon: const Icon(Icons.monitor_heart, size: 16),
                                   label: const Text('Live Monitor', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
                                   style: OutlinedButton.styleFrom(
-                                    foregroundColor: Colors.blue.shade700,
-                                    side: BorderSide(color: Colors.blue.shade200),
+                                    foregroundColor: isDark ? Colors.blue.shade300 : Colors.blue.shade700,
+                                    side: BorderSide(color: isDark ? Colors.blue.shade900 : Colors.blue.shade200),
                                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                     padding: const EdgeInsets.symmetric(vertical: 10),
                                   ),
@@ -235,9 +237,9 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
                                     padding: const EdgeInsets.only(left: 8),
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(vertical: 10),
-                                      decoration: BoxDecoration(color: Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
+                                      decoration: BoxDecoration(color: isDark ? Colors.white.withAlpha(10) : Colors.grey.shade100, borderRadius: BorderRadius.circular(8)),
                                       alignment: Alignment.center,
-                                      child: Text('Token oleh Admin', style: TextStyle(fontSize: 12, color: Colors.grey.shade500, fontWeight: FontWeight.bold)),
+                                      child: Text('Token oleh Admin', style: TextStyle(fontSize: 12, color: isDark ? Colors.grey.shade400 : Colors.grey.shade500, fontWeight: FontWeight.bold)),
                                     ),
                                   ),
                                 ),

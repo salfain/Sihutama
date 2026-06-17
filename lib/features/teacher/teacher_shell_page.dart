@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/theme.dart';
 
 class TeacherShellPage extends StatelessWidget {
   final Widget child;
@@ -33,26 +34,29 @@ class TeacherShellPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentIndex = _calculateSelectedIndex(context);
+    final isDark = AppTheme.isDark(context);
 
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       body: child,
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
-            BoxShadow(
+            if (!isDark) BoxShadow(
               color: Colors.blue.withAlpha(20),
               blurRadius: 20,
               offset: const Offset(0, -5),
             )
           ],
+          border: Border(top: BorderSide(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent)),
         ),
         child: BottomNavigationBar(
           currentIndex: currentIndex,
           onTap: (index) => _onItemTapped(index, context),
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: const Color(0xFF1D4ED8), // Blue 700
-          unselectedItemColor: Colors.grey[400],
+          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          selectedItemColor: isDark ? Colors.blue.shade400 : const Color(0xFF1D4ED8), // Blue 700
+          unselectedItemColor: isDark ? Colors.grey[500] : Colors.grey[400],
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 11),
           elevation: 0,

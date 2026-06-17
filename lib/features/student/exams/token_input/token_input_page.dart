@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme.dart';
 import '../../../../core/network/api_client.dart';
 
 class TokenInputPage extends StatefulWidget {
@@ -34,7 +35,9 @@ class _TokenInputPageState extends State<TokenInputPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(title: const Text('Input Token')),
       body: Center(
         child: Padding(
@@ -44,13 +47,13 @@ class _TokenInputPageState extends State<TokenInputPage> {
             children: [
               Container(
                 width: 72, height: 72,
-                decoration: BoxDecoration(color: Colors.orange[100], borderRadius: BorderRadius.circular(20)),
-                child: Icon(Icons.key, size: 36, color: Colors.orange[700]),
+                decoration: BoxDecoration(color: isDark ? Colors.orange.shade900.withAlpha(100) : Colors.orange[100], borderRadius: BorderRadius.circular(20)),
+                child: Icon(Icons.key, size: 36, color: isDark ? Colors.orange.shade300 : Colors.orange[700]),
               ),
               const SizedBox(height: 20),
-              const Text('Masukkan Token Ujian', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Masukkan Token Ujian', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: isDark ? Colors.white : Colors.black87)),
               const SizedBox(height: 8),
-              Text('Minta token kepada pengawas', style: TextStyle(color: Colors.grey[600], fontSize: 13)),
+              Text('Minta token kepada pengawas', style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600], fontSize: 13)),
               const SizedBox(height: 24),
               TextField(
                 controller: _ctrl,

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../app/theme.dart';
+import '../../core/providers/theme_provider.dart';
 import '../../../core/network/api_client.dart';
 
 const counselorColor = Color(0xFF7C3AED);
 
-class CounselorShellPage extends StatelessWidget {
+class CounselorShellPage extends ConsumerWidget {
   final Widget child;
   const CounselorShellPage({super.key, required this.child});
 
@@ -34,17 +37,25 @@ class CounselorShellPage extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
         title: const Text('Bimbingan Konseling', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black87,
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+        foregroundColor: isDark ? Colors.white : Colors.black87,
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, size: 22, color: Colors.black54),
+            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode, color: isDark ? Colors.orange.shade300 : Colors.grey.shade700),
+            onPressed: () {
+              ref.read(themeProvider.notifier).toggleTheme();
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.logout, size: 22, color: isDark ? Colors.white70 : Colors.black54),
             onPressed: () async {
               final router = GoRouter.of(context);
               await ApiClient().clearToken();
@@ -57,15 +68,16 @@ class CounselorShellPage extends StatelessWidget {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           boxShadow: [
-            BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 20, offset: const Offset(0, -5)),
+            if (!isDark) BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 20, offset: const Offset(0, -5)),
           ],
+          border: Border(top: BorderSide(color: isDark ? Colors.white.withAlpha(20) : Colors.transparent)),
         ),
         child: BottomNavigationBar(
           currentIndex: _calculateSelectedIndex(context),
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          selectedItemColor: counselorColor,
-          unselectedItemColor: Colors.grey.shade400,
+          backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
+          selectedItemColor: isDark ? Colors.purple.shade300 : counselorColor,
+          unselectedItemColor: isDark ? Colors.grey.shade600 : Colors.grey.shade400,
           showUnselectedLabels: true,
           selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
           unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),

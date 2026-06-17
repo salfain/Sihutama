@@ -9,6 +9,8 @@ class AppTheme {
   static Color get studentColor => _studentColor;
   static Color get teacherColor => _teacherColor;
 
+  static bool isDark(BuildContext context) => Theme.of(context).brightness == Brightness.dark;
+
   static final light = ThemeData(
     useMaterial3: true,
     brightness: Brightness.light,
