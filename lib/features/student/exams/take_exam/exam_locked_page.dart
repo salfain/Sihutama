@@ -32,7 +32,7 @@ class _ExamLockedPageState extends State<ExamLockedPage> {
     if (_checking || !mounted) return;
     setState(() => _checking = true);
     try {
-      final res = await ApiClient().dio.get('/student/exams/${widget.examId}/status');
+      final res = await ApiClient().dio.get('/student/exams/${widget.examId}/status?_t=${DateTime.now().millisecondsSinceEpoch}');
       final d = res.data;
       if (!mounted) return;
       if (d['status'] == 'SUBMITTED' || d['status'] == 'AUTO_SUBMITTED') {
@@ -41,7 +41,7 @@ class _ExamLockedPageState extends State<ExamLockedPage> {
       }
       if (d['isLocked'] == false) {
         // Sudah dibuka pengawas — kembali ke pengerjaan
-        context.go('/student/exams/${widget.examId}/test');
+        context.replace('/student/exams/${widget.examId}/test');
         return;
       }
     } catch (_) {}

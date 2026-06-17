@@ -20,10 +20,12 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
   bool _loading = true;
   bool _submitting = false;
   bool _hasNotifiedExit = false; // anti-double trigger saat lifecycle berurutan
+  late PageController _pageController;
 
   @override
   void initState() {
     super.initState();
+    _pageController = PageController(initialPage: _current);
     WidgetsBinding.instance.addObserver(this);
     _load();
   }
@@ -32,6 +34,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _timer?.cancel();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -60,7 +63,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
         _timer?.cancel();
         final r = Uri.encodeComponent(d['lockReason'] ?? reason);
         // ignore: use_build_context_synchronously
-        context.go('/student/exams/${widget.examId}/locked?reason=$r');
+        context.replace('/student/exams/${widget.examId}/locked?reason=$r');
       } else {
         // Tampilkan peringatan
         final v = d['violationCount'] ?? 0;
@@ -81,7 +84,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
     try {
       // Cek dulu status — bila sudah terkunci, redirect ke locked page
       try {
-        final st = await ApiClient().dio.get('/student/exams/${widget.examId}/status');
+        final st = await ApiClient().dio.get('/student/exams/${widget.examId}/status?_t=${DateTime.now().millisecondsSinceEpoch}');
         final sd = st.data;
         if (sd['status'] == 'SUBMITTED' || sd['status'] == 'AUTO_SUBMITTED') {
           if (mounted) context.go('/student/exams/${widget.examId}/finish');
@@ -89,7 +92,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
         }
         if (sd['isLocked'] == true) {
           final r = Uri.encodeComponent(sd['lockReason'] ?? 'Akses dikunci');
-          if (mounted) context.go('/student/exams/${widget.examId}/locked?reason=$r');
+          if (mounted) context.replace('/student/exams/${widget.examId}/locked?reason=$r');
           return;
         }
       } catch (_) {}
@@ -228,7 +231,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
             Expanded(
               child: PageView.builder(
                 itemCount: _questions.length,
-                controller: PageController(initialPage: _current),
+                controller: _pageController,
                 onPageChanged: (i) => setState(() => _current = i),
                 itemBuilder: (_, i) {
                   final qi = _questions[i];
@@ -336,7 +339,10 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                     else if (a?['selectedOptionId'] != null || (a?['answerText'] ?? '').isNotEmpty) { bg = Colors.green; fg = Colors.white; }
 
                     return GestureDetector(
-                      onTap: () => setState(() => _current = i),
+                      onTap: () {
+                        setState(() => _current = i);
+                        _pageController.jumpToPage(i);
+                      },
                       child: Container(
                         width: 36, margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
