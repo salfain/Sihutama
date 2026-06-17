@@ -1,0 +1,48 @@
+workflows:
+  ios-release:
+    name: Build iOS (IPA)
+    max_build_duration: 30
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      # Variabel ini di-set di Codemagic UI (Settings > Environment variables)
+      # Atau bisa pakai manual signing di bawah
+      groups:
+        - app_store_credentials  # opsional: jika mau auto-upload ke TestFlight
+      ios_signing:
+        distribution_type: app_store  # atau "ad_hoc" untuk test internal
+        bundle_identifier: sch.id.smkhutama.sihutama
+    scripts:
+      - name: Get dependencies
+        script: |
+          flutter pub get
+      - name: Run Flutter analyze
+        script: |
+          flutter analyze lib
+      - name: Build IPA
+        script: |
+          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      # Opsional: auto-upload ke App Store Connect / TestFlight
+      # app_store_connect:
+      #   api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+      #   key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+      #   issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+
+  android-release:
+    name: Build Android (APK)
+    max_build_duration: 15
+    instance_type: linux_x2
+    environment:
+      flutter: stable
+    scripts:
+      - name: Get dependencies
+        script: |
+          flutter pub get
+      - name: Build APK
+        script: |
+          flutter build apk --release
+    artifacts:
+      - build/app/outputs/flutter-apk/app-release.apk
