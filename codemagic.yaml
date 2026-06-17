@@ -11,7 +11,7 @@ workflows:
         - app_store_credentials  # opsional: jika mau auto-upload ke TestFlight
       ios_signing:
         distribution_type: app_store  # atau "ad_hoc" untuk test internal
-        bundle_identifier: sch.id.smkhutama.sihutama
+        bundle_identifier: com.example.cbtSmkhutama
     scripts:
       - name: Get dependencies
         script: |
