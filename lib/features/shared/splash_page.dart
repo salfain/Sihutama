@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../app/theme.dart';
 import '../../core/network/api_client.dart';
 
 class SplashPage extends StatefulWidget {
@@ -33,20 +34,23 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         final res = await ApiClient().dio.get('/auth/me');
         final role = res.data['role'] as String?;
         if (!mounted) return;
-        if (role == 'STUDENT') {
-          context.go('/student');
+        if (role == 'TEACHER') {
+          context.go('/teacher');
         } else if (role == 'COUNSELOR') {
           context.go('/counselor');
-        } else if (role == 'TEACHER') {
-          context.go('/teacher');
+        } else if (role == 'STUDENT') {
+          // Baca sistem terakhir yang dipakai siswa
+          final lastSystem = await ApiClient().getLastSystem();
+          if (!mounted) return;
+          context.go(lastSystem == 'BK' ? '/student/bk-portal' : '/student/cbt');
         } else {
-          context.go('/login');
+          context.go('/portal');
         }
       } catch (_) {
-        if (mounted) context.go('/login');
+        if (mounted) context.go('/portal');
       }
     } else {
-      context.go('/login');
+      context.go('/portal');
     }
   }
 
@@ -59,7 +63,7 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.isDark(context) ? const Color(0xFF0F172A) : Colors.white,
       body: Center(
         child: FadeTransition(
           opacity: _fade,

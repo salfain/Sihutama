@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme.dart';
 import '../../../../core/network/api_client.dart';
 
 class ExamConfirmPage extends StatefulWidget {
@@ -30,21 +31,26 @@ class _ExamConfirmPageState extends State<ExamConfirmPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : null,
       appBar: AppBar(title: const Text('Konfirmasi Ujian')),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Icon(Icons.assignment, size: 48, color: Color(0xFF1D4ED8)),
+            Icon(Icons.assignment, size: 48,
+              color: isDark ? Colors.blue.shade300 : const Color(0xFF1D4ED8)),
             const SizedBox(height: 16),
-            const Text('Siap Memulai Ujian?', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text('Siap Memulai Ujian?',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black87)),
             const SizedBox(height: 24),
-            _infoTile(Icons.timer, 'Timer berjalan setelah klik Mulai'),
-            _infoTile(Icons.save, 'Jawaban tersimpan otomatis'),
-            _infoTile(Icons.warning_amber, 'Jangan tutup aplikasi saat ujian'),
-            _infoTile(Icons.send, 'Klik Selesai untuk submit'),
-            _infoTile(Icons.timer_off, 'Auto submit jika waktu habis'),
+            _infoTile(Icons.timer, 'Timer berjalan setelah klik Mulai', isDark),
+            _infoTile(Icons.save, 'Jawaban tersimpan otomatis', isDark),
+            _infoTile(Icons.warning_amber, 'Jangan tutup aplikasi saat ujian', isDark),
+            _infoTile(Icons.send, 'Klik Selesai untuk submit', isDark),
+            _infoTile(Icons.timer_off, 'Auto submit jika waktu habis', isDark),
             const Spacer(),
             SizedBox(
               width: double.infinity, height: 52,
@@ -62,13 +68,14 @@ class _ExamConfirmPageState extends State<ExamConfirmPage> {
     );
   }
 
-  Widget _infoTile(IconData icon, String text) {
+  Widget _infoTile(IconData icon, String text, bool isDark) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: Row(children: [
         Icon(icon, size: 20, color: Colors.amber[700]),
         const SizedBox(width: 12),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 13))),
+        Expanded(child: Text(text,
+          style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[300] : Colors.grey[800]))),
       ]),
     );
   }

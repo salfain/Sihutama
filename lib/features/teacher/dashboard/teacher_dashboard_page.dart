@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
-import '../../../core/providers/theme_provider.dart';
 
 const teacherPrimaryColor = Color(0xFF1D4ED8); // Blue 700
 const teacherGradient = LinearGradient(
@@ -47,22 +46,10 @@ class _TeacherDashboardPageState extends ConsumerState<TeacherDashboardPage> {
     return Scaffold(
       backgroundColor: isDark ? const Color(0xFF0F172A) : Colors.grey[50],
       appBar: AppBar(
-        title: Text('SI Hutama - Guru', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18, color: isDark ? Colors.white : Colors.black87)),
+        title: Text('CBT — Guru', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18,
+          color: isDark ? Colors.white : Colors.black87)),
         backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.white,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode, color: isDark ? Colors.orange.shade300 : Colors.grey.shade700),
-            onPressed: () {
-              ref.read(themeProvider.notifier).toggleTheme();
-            },
-          ),
-          IconButton(icon: Icon(Icons.logout, color: isDark ? Colors.white : Colors.black87), onPressed: () async {
-            final router = GoRouter.of(context);
-            await ApiClient().clearToken();
-            router.go('/login');
-          }),
-        ],
       ),
       body: _loading
         ? const Center(child: CircularProgressIndicator(color: teacherPrimaryColor))

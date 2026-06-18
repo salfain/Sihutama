@@ -40,9 +40,20 @@ class ApiClient {
 
   Future<void> clearToken() async {
     await _storage.delete(key: 'auth_token');
+    await _storage.delete(key: 'last_system');
   }
 
   Future<String?> getToken() async {
     return _storage.read(key: 'auth_token');
+  }
+
+  /// Simpan sistem terakhir yang dipakai siswa ('CBT' atau 'BK')
+  Future<void> setLastSystem(String system) async {
+    await _storage.write(key: 'last_system', value: system);
+  }
+
+  /// Baca sistem terakhir (default 'CBT')
+  Future<String> getLastSystem() async {
+    return await _storage.read(key: 'last_system') ?? 'CBT';
   }
 }

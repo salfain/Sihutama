@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 import 'package:intl/intl.dart';
 
@@ -49,15 +50,20 @@ class _CounselorStudentDetailPageState extends State<CounselorStudentDetailPage>
     if (_loading || _s == null) {
       return const Scaffold(body: Center(child: CircularProgressIndicator(color: counselorColor)));
     }
+    final isDark = AppTheme.isDark(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back_rounded, color: Colors.black87), onPressed: () => context.pop()),
-        title: const Text('Detail Buku Siswa', style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600, fontSize: 16)),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back_rounded,
+            color: isDark ? Colors.white : Colors.black87),
+          onPressed: () => context.pop()),
+        title: Text('Detail Buku Siswa',
+          style: TextStyle(color: isDark ? Colors.white : Colors.black87,
+            fontWeight: FontWeight.w600, fontSize: 16)),
+        backgroundColor: isDark ? const Color(0xFF1E293B) : Colors.transparent,
+        elevation: 0, centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.only(bottom: 40),
@@ -129,51 +135,58 @@ class _CounselorStudentDetailPageState extends State<CounselorStudentDetailPage>
   }
 
   Widget _pointStat(String label, dynamic value, MaterialColor color) {
+    final isDark = AppTheme.isDark(context);
     return Expanded(
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? const Color(0xFF1E293B) : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          boxShadow: [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
+          boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withAlpha(5), blurRadius: 10, offset: const Offset(0, 4))],
         ),
-        child: Column(
-          children: [
-            Text('$value', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color[700])),
-            const SizedBox(height: 4),
-            Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey[500])),
-          ],
-        ),
+        child: Column(children: [
+          Text('$value', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: color[isDark ? 300 : 700])),
+          const SizedBox(height: 4),
+          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+            color: isDark ? Colors.grey[400] : Colors.grey[500])),
+        ]),
       ),
     );
   }
 
   Widget _sectionTitle(String title, IconData icon, MaterialColor color) {
+    final isDark = AppTheme.isDark(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(color: color[50], borderRadius: BorderRadius.circular(10)),
-            child: Icon(icon, size: 16, color: color[600]),
-          ),
-          const SizedBox(width: 12),
-          Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B))),
-        ],
-      ),
+      child: Row(children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isDark ? color.shade900.withAlpha(80) : color[50],
+            borderRadius: BorderRadius.circular(10)),
+          child: Icon(icon, size: 16, color: isDark ? color.shade300 : color[600]),
+        ),
+        const SizedBox(width: 12),
+        Text(title, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold,
+          color: isDark ? Colors.white : const Color(0xFF1E293B))),
+      ]),
     );
   }
 
   Widget _buildList(List items, Widget Function(dynamic) builder) {
+    final isDark = AppTheme.isDark(context);
     if (items.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         child: Container(
           width: double.infinity,
           padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: Colors.grey.shade200)),
-          child: const Text('Belum ada data.', style: TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic)),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E293B) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: isDark ? Colors.white.withAlpha(15) : Colors.grey.shade200)),
+          child: Text('Belum ada data.',
+            style: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey, fontSize: 13, fontStyle: FontStyle.italic)),
         ),
       );
     }
@@ -184,13 +197,15 @@ class _CounselorStudentDetailPageState extends State<CounselorStudentDetailPage>
   }
 
   Widget _itemCard(String title, String sub, String? badge, MaterialColor? badgeColor) {
+    final isDark = AppTheme.isDark(context);
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? const Color(0xFF1E293B) : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(2), blurRadius: 4, offset: const Offset(0, 2))],
+        border: Border.all(color: isDark ? Colors.white.withAlpha(15) : Colors.transparent),
+        boxShadow: isDark ? [] : [BoxShadow(color: Colors.black.withAlpha(2), blurRadius: 4, offset: const Offset(0, 2))],
       ),
       child: Row(
         children: [
@@ -198,9 +213,11 @@ class _CounselorStudentDetailPageState extends State<CounselorStudentDetailPage>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF1E293B))),
+                Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : const Color(0xFF1E293B))),
                 const SizedBox(height: 4),
-                Text(sub, style: TextStyle(fontSize: 12, color: Colors.grey[500])),
+                Text(sub, style: TextStyle(fontSize: 12,
+                  color: isDark ? Colors.grey[400] : Colors.grey[500])),
               ],
             ),
           ),

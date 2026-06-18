@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:dio/dio.dart';
 import 'package:go_router/go_router.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
-import '../../../core/constants/env.dart';
 
+/// [system] = 'CBT' atau 'BK'
+/// CBT  → role: STUDENT, TEACHER
+/// BK   → role: STUDENT, COUNSELOR
 class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+  final String system; // 'CBT' | 'BK'
+  const LoginPage({super.key, required this.system});
 
   @override
   State<LoginPage> createState() => _LoginPageState();
@@ -14,10 +18,38 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final _usernameCtrl = TextEditingController();
   final _passwordCtrl = TextEditingController();
-  String _role = 'STUDENT';
+  late String _role;
   bool _loading = false;
   bool _obscure = true;
   String? _error;
+
+  bool get _isCbt => widget.system == 'CBT';
+
+  // Daftar role yang ditampilkan berdasarkan sistem
+  List<String> get _roles => _isCbt ? ['STUDENT', 'TEACHER'] : ['STUDENT', 'COUNSELOR'];
+
+  // Warna aksen berdasarkan sistem
+  Color get _accentColor => _isCbt ? const Color(0xFF1D4ED8) : const Color(0xFF7C3AED);
+  List<Color> get _gradientColors => _isCbt
+      ? [const Color(0xFF1D4ED8), const Color(0xFF3B82F6)]
+      : [const Color(0xFF6D28D9), const Color(0xFF8B5CF6)];
+
+  @override
+  void initState() {
+    super.initState();
+    _role = _roles.first; // default role pertama
+  }
+
+  String _roleLabel(String r) {
+    if (r == 'STUDENT') return 'Siswa';
+    if (r == 'TEACHER') return 'Guru';
+    return 'Guru BK';
+  }
+
+  Color _buttonColor(String r) {
+    if (r == 'TEACHER') return const Color(0xFF059669);
+    return _accentColor;
+  }
 
   Future<void> _login() async {
     setState(() { _loading = true; _error = null; });
@@ -29,22 +61,27 @@ class _LoginPageState extends State<LoginPage> {
       });
       final token = res.data['token'] as String;
       await ApiClient().setToken(token);
+      await ApiClient().setLastSystem(widget.system);
 
       if (!mounted) return;
-      if (_role == 'STUDENT') {
-        context.go('/student');
+
+      if (_role == 'TEACHER') {
+        context.go('/teacher');
       } else if (_role == 'COUNSELOR') {
         context.go('/counselor');
       } else {
-        context.go('/teacher');
+        // STUDENT — arahkan berdasarkan sistem
+        if (_isCbt) {
+          context.go('/student/cbt');
+        } else {
+          context.go('/student/bk-portal');
+        }
       }
     } catch (e) {
       setState(() {
-        if (e is DioException && e.response != null) {
-          _error = e.response?.data['error'] ?? 'Login gagal';
-        } else {
-          _error = 'Tidak dapat terhubung ke server';
-        }
+        _error = (e is DioException && e.response != null)
+            ? (e.response?.data['error'] ?? 'Login gagal')
+            : 'Tidak dapat terhubung ke server';
       });
     } finally {
       setState(() => _loading = false);
@@ -53,144 +90,197 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Logo sekolah (dari server, fallback ke inisial)
-                Container(
-                  width: 72, height: 72,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: const Color(0xFF1D4ED8),
-                      child: const Center(
-                        child: Text('SH', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24)),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text('Si Hutama', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('Masuk ke sistem ujian', style: TextStyle(color: Colors.grey[600], fontSize: 14)),
-                const SizedBox(height: 32),
+    final isDark = AppTheme.isDark(context);
 
-                // Role selector
+    return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC),
+      body: Column(
+        children: [
+          // Header gradient (visual penanda sistem)
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top + 16,
+              bottom: 28, left: 24, right: 24),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: _gradientColors,
+                begin: Alignment.topLeft, end: Alignment.bottomRight)),
+            child: Column(children: [
+              // Back button + judul
+              Row(children: [
+                GestureDetector(
+                  onTap: () => context.go('/portal'),
+                  child: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withAlpha(30),
+                      borderRadius: BorderRadius.circular(10)),
+                    child: const Icon(Icons.arrow_back_rounded, color: Colors.white, size: 20)),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(_isCbt ? 'CBT — Ujian Online' : 'SIBIKONS — BK',
+                      style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                    Text(_isCbt ? 'Sistem Ujian Digital' : 'Bimbingan Konseling',
+                      style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 12)),
+                  ]),
+                ),
                 Container(
-                  padding: const EdgeInsets.all(4),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[100],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Row(
-                    children: ['STUDENT', 'TEACHER', 'COUNSELOR'].map((r) {
-                      final selected = _role == r;
-                      final label = r == 'STUDENT' ? 'Siswa' : r == 'TEACHER' ? 'Guru' : 'Guru BK';
-                      return Expanded(
-                        child: GestureDetector(
-                          onTap: () => setState(() => _role = r),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                              color: selected ? Colors.white : Colors.transparent,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: selected ? [BoxShadow(color: Colors.black.withAlpha(15), blurRadius: 4)] : null,
-                            ),
-                            child: Center(
-                              child: Text(
-                                label,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                                  color: selected ? Colors.grey[900] : Colors.grey[500],
-                                ),
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(color: Colors.white.withAlpha(30), borderRadius: BorderRadius.circular(14)),
+                  child: Icon(_isCbt ? Icons.assignment_rounded : Icons.favorite_rounded,
+                    color: Colors.white, size: 22),
+                ),
+              ]),
+            ]),
+          ),
+
+          // Form login
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Text('Masuk', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.grey[900])),
+                  const SizedBox(height: 4),
+                  Text('Pilih peran dan masukkan kredensial Anda',
+                    style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[400] : Colors.grey[600])),
+                  const SizedBox(height: 28),
+
+                  // Role selector
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E293B) : Colors.grey[100],
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: _roles.map((r) {
+                        final selected = _role == r;
+                        return Expanded(
+                          child: GestureDetector(
+                            onTap: () => setState(() { _role = r; _error = null; }),
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: BoxDecoration(
+                                color: selected
+                                    ? (isDark ? const Color(0xFF334155) : Colors.white)
+                                    : Colors.transparent,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: selected && !isDark
+                                    ? [BoxShadow(color: _accentColor.withAlpha(20), blurRadius: 8, offset: const Offset(0, 2))]
+                                    : null,
+                              ),
+                              child: Center(
+                                child: Text(_roleLabel(r),
+                                  style: TextStyle(
+                                    fontSize: 14, fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                                    color: selected
+                                        ? (isDark ? Colors.white : _accentColor)
+                                        : (isDark ? Colors.grey[500] : Colors.grey[500]),
+                                  )),
                               ),
                             ),
                           ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Username
-                TextField(
-                  controller: _usernameCtrl,
-                  decoration: InputDecoration(
-                    labelText: _role == 'STUDENT' ? 'NIS / Username' : 'Username',
-                    hintText: _role == 'STUDENT' ? '2324001' : _role == 'COUNSELOR' ? 'bk.hutama' : 'sari.dewi',
-                    prefixIcon: const Icon(Icons.person_outline),
-                  ),
-                  textInputAction: TextInputAction.next,
-                ),
-                const SizedBox(height: 14),
-
-                // Password
-                TextField(
-                  controller: _passwordCtrl,
-                  obscureText: _obscure,
-                  decoration: InputDecoration(
-                    labelText: 'Password',
-                    prefixIcon: const Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
-                      onPressed: () => setState(() => _obscure = !_obscure),
+                        );
+                      }).toList(),
                     ),
                   ),
-                  onSubmitted: (_) => _login(),
-                ),
-                const SizedBox(height: 8),
+                  const SizedBox(height: 24),
 
-                if (_error != null) ...[
-                  const SizedBox(height: 8),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red[50],
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: Colors.red.shade200),
+                  // Input username
+                  TextField(
+                    controller: _usernameCtrl,
+                    decoration: InputDecoration(
+                      labelText: _role == 'STUDENT' ? 'NIS / Username' : 'Username',
+                      hintText: _role == 'STUDENT' ? '2324001'
+                          : _role == 'COUNSELOR' ? 'bk.hutama' : 'sari.dewi',
+                      prefixIcon: const Icon(Icons.person_outline),
                     ),
-                    child: Text(_error!, style: TextStyle(color: Colors.red[700], fontSize: 13)),
+                    textInputAction: TextInputAction.next,
+                  ),
+                  const SizedBox(height: 14),
+
+                  // Input password
+                  TextField(
+                    controller: _passwordCtrl,
+                    obscureText: _obscure,
+                    decoration: InputDecoration(
+                      labelText: 'Password',
+                      prefixIcon: const Icon(Icons.lock_outline),
+                      suffixIcon: IconButton(
+                        icon: Icon(_obscure ? Icons.visibility_off : Icons.visibility),
+                        onPressed: () => setState(() => _obscure = !_obscure),
+                      ),
+                    ),
+                    onSubmitted: (_) => _login(),
+                  ),
+
+                  // Error
+                  if (_error != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      width: double.infinity, padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark ? Colors.red.shade900.withAlpha(80) : Colors.red[50],
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isDark ? Colors.red.shade700 : Colors.red.shade200)),
+                      child: Row(children: [
+                        Icon(Icons.error_outline, size: 16,
+                          color: isDark ? Colors.red.shade300 : Colors.red[700]),
+                        const SizedBox(width: 8),
+                        Expanded(child: Text(_error!,
+                          style: TextStyle(
+                            color: isDark ? Colors.red.shade300 : Colors.red[700], fontSize: 13))),
+                      ]),
+                    ),
+                  ],
+
+                  const SizedBox(height: 24),
+
+                  // Tombol masuk
+                  SizedBox(
+                    width: double.infinity, height: 52,
+                    child: ElevatedButton(
+                      onPressed: _loading ? null : _login,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _buttonColor(_role),
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      child: _loading
+                          ? const SizedBox(width: 22, height: 22,
+                              child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
+                          : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                              Icon(_role == 'STUDENT' ? Icons.school_rounded
+                                  : _role == 'TEACHER' ? Icons.cast_for_education_rounded
+                                  : Icons.favorite_rounded,
+                                size: 18, color: Colors.white),
+                              const SizedBox(width: 8),
+                              Text('Masuk sebagai ${_roleLabel(_role)}',
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700)),
+                            ]),
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+                  Center(
+                    child: Text('Lupa password? Hubungi admin.',
+                      style: TextStyle(color: isDark ? Colors.grey[600] : Colors.grey[400], fontSize: 12)),
                   ),
                 ],
-
-                const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 50,
-                  child: ElevatedButton(
-                    onPressed: _loading ? null : _login,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _role == 'STUDENT'
-                          ? const Color(0xFFF97316)
-                          : _role == 'COUNSELOR'
-                              ? const Color(0xFF7C3AED)
-                              : const Color(0xFF059669),
-                    ),
-                    child: _loading
-                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
-                      : Text('Masuk sebagai ${_role == 'STUDENT' ? 'Siswa' : _role == 'COUNSELOR' ? 'Guru BK' : 'Guru'}'),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Text('Lupa password? Hubungi admin.', style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

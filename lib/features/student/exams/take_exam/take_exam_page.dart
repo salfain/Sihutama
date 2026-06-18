@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../app/theme.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/utils/violation_queue.dart';
 
@@ -304,14 +305,21 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
   // ─── Build ───────────────────────────────────────────────────────────────
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
+    final bgColor = isDark ? const Color(0xFF0F172A) : const Color(0xFFF8FAFC);
+    final cardColor = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final borderColor = isDark ? Colors.white.withAlpha(20) : Colors.grey.shade200;
+    final textPrimary = isDark ? Colors.white : Colors.grey[800]!;
+    final textSecondary = isDark ? Colors.grey[400]! : Colors.grey[500]!;
+
     if (_loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+      return Scaffold(backgroundColor: bgColor, body: const Center(child: CircularProgressIndicator()));
     }
 
     // Overlay blokir saat sedang melaporkan pelanggaran ke server
     if (_reportingViolation) {
       return Scaffold(
-        backgroundColor: Colors.grey[100],
+        backgroundColor: isDark ? const Color(0xFF1C1917) : Colors.grey[100],
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(32),
@@ -319,22 +327,19 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
               Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.orange[100],
+                  color: isDark ? Colors.orange.shade900.withAlpha(80) : Colors.orange[100],
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.security, size: 48, color: Colors.orange[800]),
+                child: Icon(Icons.security, size: 48, color: isDark ? Colors.orange.shade300 : Colors.orange[800]),
               ),
               const SizedBox(height: 20),
-              Text(
-                'Menyinkronkan...',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.orange[900]),
-              ),
+              Text('Menyinkronkan...',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.orange.shade300 : Colors.orange[900])),
               const SizedBox(height: 8),
-              Text(
-                'Terdeteksi keluar aplikasi. Melaporkan ke server, mohon tunggu.',
+              Text('Terdeteksi keluar aplikasi. Melaporkan ke server, mohon tunggu.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 13, color: Colors.grey[700]),
-              ),
+                style: TextStyle(fontSize: 13, color: isDark ? Colors.grey[400] : Colors.grey[700])),
               const SizedBox(height: 24),
               const CircularProgressIndicator(),
             ]),
@@ -344,54 +349,48 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
     }
 
     if (_questions.isEmpty) {
-      return Scaffold(appBar: AppBar(), body: const Center(child: Text('Tidak ada soal')));
+      return Scaffold(backgroundColor: bgColor, appBar: AppBar(), body: const Center(child: Text('Tidak ada soal')));
     }
 
     final isWarning  = _timeLeft < 600;
     final isCritical = _timeLeft < 180;
 
+    // Warna header: merah/oranye saat kritis/warning, slate-800 saat dark normal, putih saat light normal
+    final headerBg = isCritical ? Colors.red
+        : isWarning ? Colors.orange
+        : isDark ? const Color(0xFF1E293B) : Colors.white;
+    final headerTextColor = (isCritical || isWarning) ? Colors.white : textPrimary;
+    final timerBg = isCritical ? Colors.red[800]
+        : isWarning ? Colors.orange[800]
+        : isDark ? const Color(0xFF334155) : Colors.grey[100];
+
     return Scaffold(
+      backgroundColor: bgColor,
       body: SafeArea(
         child: Column(
           children: [
             // ── Header ──────────────────────────────────────────────────────
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              color: isCritical ? Colors.red : isWarning ? Colors.orange : Colors.white,
+              color: headerBg,
               child: Row(children: [
                 Expanded(
-                  child: Text(
-                    _title,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 13,
-                      color: isCritical || isWarning ? Colors.white : Colors.grey[800],
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
+                  child: Text(_title,
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: headerTextColor),
+                    overflow: TextOverflow.ellipsis),
                 ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isCritical ? Colors.red[800] : isWarning ? Colors.orange[800] : Colors.grey[100],
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    _formattedTime,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold, fontFamily: 'monospace', fontSize: 16,
-                      color: isCritical || isWarning ? Colors.white : Colors.grey[800],
-                    ),
-                  ),
+                  decoration: BoxDecoration(color: timerBg, borderRadius: BorderRadius.circular(8)),
+                  child: Text(_formattedTime,
+                    style: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'monospace', fontSize: 16,
+                      color: (isCritical || isWarning) ? Colors.white : textPrimary)),
                 ),
                 const SizedBox(width: 8),
                 IconButton(
-                  icon: Icon(
-                    Icons.send,
-                    color: isCritical || isWarning ? Colors.white : Colors.red,
-                    size: 20,
-                  ),
-                  onPressed: _showSubmitDialog,
-                  tooltip: 'Submit',
+                  icon: Icon(Icons.send,
+                    color: isCritical || isWarning ? Colors.white : Colors.red, size: 20),
+                  onPressed: _showSubmitDialog, tooltip: 'Submit',
                 ),
               ]),
             ),
@@ -406,61 +405,70 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                   final qi = _questions[i];
                   final qiId = qi['id'].toString();
                   final qAns = _answers[qiId];
+                  final isDoubtful = qAns?['isDoubtful'] == true;
                   return SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Row(children: [
-                          Text(
-                            'Soal ${i + 1}/${_questions.length}',
-                            style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.w600),
-                          ),
+                          Text('Soal ${i + 1}/${_questions.length}',
+                            style: TextStyle(color: textSecondary, fontSize: 12, fontWeight: FontWeight.w600)),
                           const Spacer(),
                           GestureDetector(
-                            onTap: () => _saveAnswer(qiId, doubtful: !(qAns?['isDoubtful'] ?? false)),
+                            onTap: () => _saveAnswer(qiId, doubtful: !isDoubtful),
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                               decoration: BoxDecoration(
-                                color: qAns?['isDoubtful'] == true ? Colors.yellow[100] : Colors.grey[100],
+                                color: isDoubtful
+                                    ? Colors.yellow[100]
+                                    : isDark ? const Color(0xFF334155) : Colors.grey[100],
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: qAns?['isDoubtful'] == true ? Colors.yellow[700]! : Colors.grey[300]!,
-                                ),
+                                  color: isDoubtful
+                                      ? Colors.yellow[700]!
+                                      : isDark ? Colors.white.withAlpha(20) : Colors.grey[300]!),
                               ),
                               child: Row(mainAxisSize: MainAxisSize.min, children: [
-                                Icon(
-                                  Icons.flag, size: 14,
-                                  color: qAns?['isDoubtful'] == true ? Colors.yellow[800] : Colors.grey[500],
-                                ),
+                                Icon(Icons.flag, size: 14,
+                                  color: isDoubtful ? Colors.yellow[800] : textSecondary),
                                 const SizedBox(width: 4),
-                                Text(
-                                  'Ragu',
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    color: qAns?['isDoubtful'] == true ? Colors.yellow[800] : Colors.grey[600],
-                                  ),
-                                ),
+                                Text('Ragu', style: TextStyle(fontSize: 11,
+                                  color: isDoubtful ? Colors.yellow[800] : textSecondary)),
                               ]),
                             ),
                           ),
                         ]),
                         const SizedBox(height: 12),
+                        // Kotak soal
                         Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.all(16),
+                          width: double.infinity, padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.grey.shade200),
-                          ),
-                          child: Text(qi['questionText'] ?? '', style: const TextStyle(fontSize: 15, height: 1.5)),
+                            color: cardColor, borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: borderColor)),
+                          child: Text(qi['questionText'] ?? '',
+                            style: TextStyle(fontSize: 15, height: 1.5, color: textPrimary)),
                         ),
                         const SizedBox(height: 16),
                         // Opsi atau input teks
                         if ((qi['options'] as List?)?.isNotEmpty ?? false)
                           ...(qi['options'] as List).map((opt) {
                             final selected = qAns?['selectedOptionId'] == opt['id'];
+                            final optBg = selected
+                                ? (isDark ? const Color(0xFF1E3A5F) : const Color(0xFFEFF6FF))
+                                : cardColor;
+                            final optBorder = selected
+                                ? const Color(0xFF3B82F6)
+                                : borderColor;
+                            final optTextColor = selected
+                                ? const Color(0xFF93C5FD)
+                                : textPrimary;
+                            final circleBg = selected
+                                ? const Color(0xFF3B82F6)
+                                : (isDark ? const Color(0xFF334155) : Colors.grey[100]!);
+                            final circleBorder = selected
+                                ? const Color(0xFF3B82F6)
+                                : (isDark ? Colors.white.withAlpha(30) : Colors.grey[300]!);
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 8),
                               child: InkWell(
@@ -469,42 +477,26 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                                 child: Container(
                                   padding: const EdgeInsets.all(14),
                                   decoration: BoxDecoration(
-                                    color: selected ? const Color(0xFFEFF6FF) : Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: selected ? const Color(0xFF3B82F6) : Colors.grey.shade200,
-                                      width: selected ? 2 : 1,
-                                    ),
-                                  ),
+                                    color: optBg, borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: optBorder, width: selected ? 2 : 1)),
                                   child: Row(children: [
                                     Container(
                                       width: 30, height: 30,
                                       decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: selected ? const Color(0xFF3B82F6) : Colors.grey[100],
-                                        border: Border.all(
-                                          color: selected ? const Color(0xFF3B82F6) : Colors.grey[300]!,
-                                          width: 2,
-                                        ),
-                                      ),
+                                        shape: BoxShape.circle, color: circleBg,
+                                        border: Border.all(color: circleBorder, width: 2)),
                                       child: Center(
                                         child: selected
-                                            ? const Icon(Icons.check, size: 16, color: Colors.white)
-                                            : Text(
-                                                opt['label'] ?? '',
-                                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey[600]),
-                                              ),
+                                          ? const Icon(Icons.check, size: 16, color: Colors.white)
+                                          : Text(opt['label'] ?? '',
+                                              style: TextStyle(fontWeight: FontWeight.bold,
+                                                fontSize: 12, color: textSecondary)),
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     Expanded(
-                                      child: Text(
-                                        opt['text'] ?? '',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: selected ? const Color(0xFF1E40AF) : Colors.grey[800],
-                                        ),
-                                      ),
+                                      child: Text(opt['text'] ?? '',
+                                        style: TextStyle(fontSize: 14, color: optTextColor)),
                                     ),
                                   ]),
                                 ),
@@ -516,9 +508,7 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                             maxLines: qi['questionType'] == 'ESSAY' ? 8 : 2,
                             decoration: InputDecoration(
                               hintText: qi['questionType'] == 'ESSAY'
-                                  ? 'Tulis jawaban esai...'
-                                  : 'Jawaban singkat...',
-                            ),
+                                  ? 'Tulis jawaban esai...' : 'Jawaban singkat...'),
                             onChanged: (v) => _saveAnswer(qiId, text: v),
                             controller: TextEditingController(text: qAns?['answerText'] ?? ''),
                           ),
@@ -533,8 +523,8 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: Colors.grey.shade200)),
+                color: isDark ? const Color(0xFF1E293B) : Colors.white,
+                border: Border(top: BorderSide(color: borderColor)),
               ),
               child: SizedBox(
                 height: 36,
@@ -545,34 +535,23 @@ class _TakeExamPageState extends State<TakeExamPage> with WidgetsBindingObserver
                     final qi = _questions[i];
                     final qiId = qi['id'].toString();
                     final a = _answers[qiId];
-                    Color bg = Colors.grey[200]!;
-                    Color fg = Colors.grey[600]!;
+                    Color bg = isDark ? const Color(0xFF334155) : Colors.grey[200]!;
+                    Color fg = textSecondary;
                     if (i == _current) {
-                      bg = const Color(0xFF3B82F6);
-                      fg = Colors.white;
+                      bg = const Color(0xFF3B82F6); fg = Colors.white;
                     } else if (a?['isDoubtful'] == true) {
-                      bg = Colors.yellow[400]!;
-                      fg = Colors.white;
+                      bg = Colors.yellow[400]!; fg = Colors.white;
                     } else if (a?['selectedOptionId'] != null ||
                         (a?['answerText'] ?? '').isNotEmpty) {
-                      bg = Colors.green;
-                      fg = Colors.white;
+                      bg = Colors.green; fg = Colors.white;
                     }
                     return GestureDetector(
-                      onTap: () {
-                        setState(() => _current = i);
-                        _pageController.jumpToPage(i);
-                      },
+                      onTap: () { setState(() => _current = i); _pageController.jumpToPage(i); },
                       child: Container(
-                        width: 36,
-                        margin: const EdgeInsets.symmetric(horizontal: 3),
+                        width: 36, margin: const EdgeInsets.symmetric(horizontal: 3),
                         decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(8)),
-                        child: Center(
-                          child: Text(
-                            '${i + 1}',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: fg),
-                          ),
-                        ),
+                        child: Center(child: Text('${i + 1}',
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: fg))),
                       ),
                     );
                   },

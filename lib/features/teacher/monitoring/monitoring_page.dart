@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../app/theme.dart';
 import '../../../core/network/api_client.dart';
 
 class MonitoringPage extends StatefulWidget {
@@ -26,6 +27,12 @@ class _MonitoringPageState extends State<MonitoringPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = AppTheme.isDark(context);
+    final cardBg = isDark ? const Color(0xFF1E293B) : Colors.white;
+    final summaryBg = isDark ? const Color(0xFF1E3A5F) : Colors.blue[50]!;
+    final textSec = isDark ? Colors.grey[400]! : Colors.grey[500]!;
+    final progressBg = isDark ? Colors.white.withAlpha(20) : Colors.grey[200]!;
+
     return Scaffold(
       appBar: AppBar(title: Text(_data?['exam']?['title'] ?? 'Monitoring')),
       body: _loading
@@ -37,13 +44,18 @@ class _MonitoringPageState extends State<MonitoringPage> {
               children: [
                 // Summary
                 Card(
-                  color: Colors.blue[50],
+                  color: summaryBg,
                   child: Padding(
                     padding: const EdgeInsets.all(14),
                     child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
-                      _stat('Total', '${(_data?['participants'] as List?)?.length ?? 0}', Colors.grey),
-                      _stat('Mengerjakan', '${(_data?['participants'] as List?)?.where((p) => p['status'] == 'IN_PROGRESS').length ?? 0}', Colors.green),
-                      _stat('Selesai', '${(_data?['participants'] as List?)?.where((p) => p['status'] == 'SUBMITTED' || p['status'] == 'AUTO_SUBMITTED').length ?? 0}', Colors.blue),
+                      _stat('Total', '${(_data?['participants'] as List?)?.length ?? 0}',
+                        isDark ? Colors.grey[300]! : Colors.grey),
+                      _stat('Mengerjakan',
+                        '${(_data?['participants'] as List?)?.where((p) => p['status'] == 'IN_PROGRESS').length ?? 0}',
+                        Colors.green),
+                      _stat('Selesai',
+                        '${(_data?['participants'] as List?)?.where((p) => p['status'] == 'SUBMITTED' || p['status'] == 'AUTO_SUBMITTED').length ?? 0}',
+                        isDark ? Colors.blue.shade300 : Colors.blue),
                     ]),
                   ),
                 ),
@@ -52,33 +64,31 @@ class _MonitoringPageState extends State<MonitoringPage> {
                   final status = p['status'] ?? 'NOT_STARTED';
                   final progress = (p['answeredCount'] ?? 0) / ((_data?['exam']?['totalQuestions'] ?? 1) as int);
                   return Card(
+                    color: cardBg,
                     margin: const EdgeInsets.only(bottom: 8),
                     child: Padding(
                       padding: const EdgeInsets.all(12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(children: [
-                            Expanded(child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(p['studentName'] ?? '', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                                Text(p['className'] ?? '', style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                              ],
-                            )),
-                            _statusChip(status),
-                          ]),
-                          const SizedBox(height: 8),
-                          LinearProgressIndicator(
-                            value: progress.clamp(0.0, 1.0),
-                            backgroundColor: Colors.grey[200],
-                            color: status == 'IN_PROGRESS' ? Colors.green : Colors.blue,
-                          ),
-                          const SizedBox(height: 4),
-                          Text('${p['answeredCount']}/${_data?['exam']?['totalQuestions']} soal',
-                            style: TextStyle(fontSize: 11, color: Colors.grey[500])),
-                        ],
-                      ),
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                            Text(p['studentName'] ?? '',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14,
+                                color: isDark ? Colors.white : Colors.black87)),
+                            Text(p['className'] ?? '',
+                              style: TextStyle(fontSize: 11, color: textSec)),
+                          ])),
+                          _statusChip(status),
+                        ]),
+                        const SizedBox(height: 8),
+                        LinearProgressIndicator(
+                          value: progress.clamp(0.0, 1.0),
+                          backgroundColor: progressBg,
+                          color: status == 'IN_PROGRESS' ? Colors.green : Colors.blue,
+                        ),
+                        const SizedBox(height: 4),
+                        Text('${p['answeredCount']}/${_data?['exam']?['totalQuestions']} soal',
+                          style: TextStyle(fontSize: 11, color: textSec)),
+                      ]),
                     ),
                   );
                 }),
@@ -91,7 +101,7 @@ class _MonitoringPageState extends State<MonitoringPage> {
   Widget _stat(String label, String val, Color c) {
     return Column(children: [
       Text(val, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: c)),
-      Text(label, style: TextStyle(fontSize: 11, color: Colors.grey[600])),
+      Text(label, style: TextStyle(fontSize: 11, color: c.withAlpha(180))),
     ]);
   }
 
