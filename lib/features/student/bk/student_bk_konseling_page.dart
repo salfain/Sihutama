@@ -35,9 +35,19 @@ class _State extends State<StudentBkKonselingPage> with SingleTickerProviderStat
         ApiClient().dio.get('/student/bk'),
         ApiClient().dio.get('/student/surveys'),
       ]);
-      setState(() { _data = res[0].data; _surveys = res[1].data as List; });
-    } catch (_) {}
-    setState(() => _loading = false);
+      if (mounted) {
+        setState(() {
+          _data = res[0].data as Map<String, dynamic>?;
+          _surveys = (res[1].data as List?) ?? [];
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: $e'), backgroundColor: Colors.red));
+      }
+    }
+    if (mounted) setState(() => _loading = false);
   }
 
   String _fmt(dynamic d) {

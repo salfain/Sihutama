@@ -35,11 +35,21 @@ import '../features/teacher/essay_grading/essay_grading_page.dart';
 import '../features/teacher/teacher_shell_page.dart';
 import '../features/teacher/profil/teacher_profil_page.dart';
 
+// Piket
+import '../features/piket/piket_shell_page.dart';
+import '../features/piket/dashboard/piket_dashboard_page.dart';
+import '../features/piket/terlambat/piket_terlambat_page.dart';
+import '../features/piket/izin/piket_izin_page.dart';
+import '../features/piket/guru/piket_guru_page.dart';
+import '../features/piket/laporan/piket_laporan_page.dart';
+import '../features/piket/profil/piket_profil_page.dart';
+
 // Counselor
 import '../features/counselor/dashboard/counselor_dashboard_page.dart';
 import '../features/counselor/counseling/counselor_counseling_page.dart';
 import '../features/counselor/students/counselor_students_page.dart';
 import '../features/counselor/students/counselor_student_detail_page.dart';
+import '../features/counselor/cases/counselor_case_detail_page.dart';
 import '../features/counselor/surveys/counselor_surveys_page.dart';
 import '../features/counselor/counselor_shell_page.dart';
 import '../features/counselor/profil/counselor_profil_page.dart';
@@ -127,6 +137,22 @@ final routerProvider = Provider<GoRouter>((ref) {
             builder: (_, state) => CounselorStudentDetailPage(id: state.pathParameters['id']!)),
           GoRoute(path: '/counselor/surveys', builder: (_, __) => const CounselorSurveysPage()),
           GoRoute(path: '/counselor/profil', builder: (_, __) => const CounselorProfilPage()),
+        ],
+      ),
+      // Counselor sub-routes (di luar shell)
+      GoRoute(path: '/counselor/cases/:id', builder: (_, state) =>
+        CounselorCaseDetailPage(id: state.pathParameters['id']!)),
+
+      // ── Guru Piket ───────────────────────────────────────────────────────
+      ShellRoute(
+        builder: (context, state, child) => PiketShellPage(child: child),
+        routes: [
+          GoRoute(path: '/piket', builder: (_, __) => const PiketDashboardPage()),
+          GoRoute(path: '/piket/terlambat', builder: (_, __) => const PiketTerlambatPage()),
+          GoRoute(path: '/piket/izin', builder: (_, __) => const PiketIzinPage()),
+          GoRoute(path: '/piket/guru', builder: (_, __) => const PiketGuruPage()),
+          GoRoute(path: '/piket/laporan', builder: (_, __) => const PiketLaporanPage()),
+          GoRoute(path: '/piket/profil', builder: (_, __) => const PiketProfilPage()),
         ],
       ),
     ],

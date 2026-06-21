@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/providers/theme_provider.dart';
 import '../../../app/theme.dart';
-import '../../../core/network/api_client.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
 const studentGradient = LinearGradient(

@@ -44,11 +44,16 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
       ]);
       if (mounted) {
         setState(() {
-          _requests = res[0].data as List;
-          _cases = res[1].data as List;
+          _requests = (res[0].data as List?) ?? [];
+          _cases = (res[1].data as List?) ?? [];
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: $e'), backgroundColor: Colors.red));
+      }
+    }
     if (mounted) setState(() => _loading = false);
   }
 
@@ -218,7 +223,9 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
         itemCount: _cases.length,
         itemBuilder: (context, i) {
           final c = _cases[i];
-          return Container(
+          return GestureDetector(
+            onTap: () => context.push('/counselor/cases/${c['id']}').then((_) => _load()),
+            child: Container(
             margin: const EdgeInsets.only(bottom: 12),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E293B) : Colors.white,
@@ -273,7 +280,8 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                 ],
               ),
             ),
-          );
+          ),
+          ); // GestureDetector
         },
       ),
     );
@@ -322,7 +330,7 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                   ),
                   const SizedBox(height: 24),
                   DropdownButtonFormField<String>(
-                    value: status,
+                    initialValue: status,
                     dropdownColor: Colors.white,
                     style: const TextStyle(color: Colors.black87),
                     decoration: InputDecoration(
@@ -357,7 +365,7 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                         final nav = Navigator.of(ctx);
                         final messenger = ScaffoldMessenger.of(context);
                         try {
-                          await ApiClient().dio.post('/counselor/requests/${r['id']}', data: {
+                          await ApiClient().dio.patch('/counselor/requests/${r['id']}', data: {
                             'status': status, 'response': responseCtrl.text.trim(),
                           });
                           nav.pop();

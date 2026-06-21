@@ -10,12 +10,12 @@ class Env {
   ///   - Domain + HTTPS        : --dart-define=API_BASE_URL=https://domainmu/api
   static const apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://43.133.134.10/api',
+    defaultValue: 'https://smkhutama.web.id/api',
   );
 
   /// URL asal (origin) server, untuk memuat aset seperti logo sekolah.
   static const apiOrigin = String.fromEnvironment(
     'API_ORIGIN',
-    defaultValue: 'http://43.133.134.10',
+    defaultValue: 'https://smkhutama.web.id',
   );
 }

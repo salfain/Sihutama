@@ -2,6 +2,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../constants/env.dart';
 
+/// Callback global dipanggil saat token expired (401)
+/// Di-set dari main.dart setelah router siap
+void Function()? onTokenExpired;
+
 class ApiClient {
   static final ApiClient _instance = ApiClient._();
   factory ApiClient() => _instance;
@@ -25,9 +29,11 @@ class ApiClient {
         }
         handler.next(options);
       },
-      onError: (error, handler) {
+      onError: (error, handler) async {
         if (error.response?.statusCode == 401) {
-          // Token expired - bisa trigger logout
+          // Token expired — hapus token dan trigger redirect ke portal
+          await clearToken();
+          onTokenExpired?.call();
         }
         handler.next(error);
       },

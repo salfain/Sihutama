@@ -23,9 +23,16 @@ class _State extends State<StudentBkPermohonanPage> {
     setState(() => _loading = true);
     try {
       final res = await ApiClient().dio.get('/student/bk');
-      setState(() => _requests = (res.data['requests'] as List?) ?? []);
-    } catch (_) {}
-    setState(() => _loading = false);
+      if (mounted) {
+        setState(() => _requests = (res.data['requests'] as List?) ?? []);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat data: $e'), backgroundColor: Colors.red));
+      }
+    }
+    if (mounted) setState(() => _loading = false);
   }
 
   String _fmt(dynamic d) {

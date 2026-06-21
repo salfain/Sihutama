@@ -60,7 +60,7 @@ class _State extends ConsumerState<StudentBkProfilPage> {
                         padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
                         child: Column(children: [
                           Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                            Text('Profil', style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                            const Text('Profil', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                               decoration: BoxDecoration(color: Colors.white.withAlpha(25), borderRadius: BorderRadius.circular(20)),

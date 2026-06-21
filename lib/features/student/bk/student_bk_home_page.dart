@@ -236,7 +236,7 @@ class _StudentBkHomePageState extends State<StudentBkHomePage> {
       if (onTap != null)
         GestureDetector(
           onTap: onTap,
-          child: Text('Lihat semua',
+          child: const Text('Lihat semua',
             style: TextStyle(fontSize: 12, color: _purple, fontWeight: FontWeight.w600))),
     ]);
   }

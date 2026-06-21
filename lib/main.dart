@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/router.dart';
 import 'app/theme.dart';
+import 'core/network/api_client.dart';
 import 'core/providers/theme_provider.dart';
 
 void main() {
@@ -16,6 +17,11 @@ class CbtApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(routerProvider);
     final themeMode = ref.watch(themeProvider);
+
+    // Set callback token expired — redirect ke portal
+    onTokenExpired = () {
+      router.go('/portal');
+    };
 
     return MaterialApp.router(
       title: 'SiHutama',

@@ -35,9 +35,13 @@ class _SplashPageState extends State<SplashPage> with SingleTickerProviderStateM
         final role = res.data['role'] as String?;
         if (!mounted) return;
         if (role == 'TEACHER') {
-          context.go('/teacher');
+          final lastSystem = await ApiClient().getLastSystem();
+          if (!mounted) return;
+          context.go(lastSystem == 'PIKET' ? '/piket' : '/teacher');
         } else if (role == 'COUNSELOR') {
           context.go('/counselor');
+        } else if (role == 'PIKET') {
+          context.go('/piket');
         } else if (role == 'STUDENT') {
           // Baca sistem terakhir yang dipakai siswa
           final lastSystem = await ApiClient().getLastSystem();

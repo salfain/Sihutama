@@ -22,9 +22,14 @@ class _StudentResultsPageState extends State<StudentResultsPage> {
     setState(() => _loading = true);
     try {
       final res = await ApiClient().dio.get('/student/results');
-      setState(() => _results = res.data as List);
-    } catch (_) {}
-    setState(() => _loading = false);
+      if (mounted) setState(() => _results = (res.data as List?) ?? []);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat nilai: $e'), backgroundColor: Colors.red));
+      }
+    }
+    if (mounted) setState(() => _loading = false);
   }
 
   @override

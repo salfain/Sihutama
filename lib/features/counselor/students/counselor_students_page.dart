@@ -39,7 +39,7 @@ class _CounselorStudentsPageState extends State<CounselorStudentsPage> {
       final res = await ApiClient().dio.get('/counselor/students/book');
       if (mounted) {
         setState(() {
-          _students = res.data as List;
+          _students = (res.data as List?) ?? [];
           _filtered = _students;
         });
       }

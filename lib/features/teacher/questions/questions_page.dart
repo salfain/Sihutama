@@ -21,9 +21,14 @@ class _QuestionsPageState extends State<QuestionsPage> {
     setState(() => _loading = true);
     try {
       final res = await ApiClient().dio.get('/teacher/questions');
-      setState(() => _questions = res.data as List);
-    } catch (_) {}
-    setState(() => _loading = false);
+      if (mounted) setState(() => _questions = (res.data as List?) ?? []);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat soal: $e'), backgroundColor: Colors.red));
+      }
+    }
+    if (mounted) setState(() => _loading = false);
   }
 
   @override

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/theme.dart';
 import '../../../../core/network/api_client.dart';
-import '../../../../core/network/api_client.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
 
@@ -185,7 +184,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
               ))
             else if (isDone)
               SizedBox(width: double.infinity, child: OutlinedButton.icon(
-                onPressed: () => context.push('/student/results'),
+                onPressed: () => context.go('/student/cbt/results'),
                 icon: Icon(Icons.check_circle, size: 18, color: Colors.green.shade600),
                 label: Text('Selesai • Nilai: ${attempt['score'] ?? '—'}', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold)),
                 style: OutlinedButton.styleFrom(

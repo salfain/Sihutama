@@ -23,9 +23,14 @@ class _TeacherExamsPageState extends State<TeacherExamsPage> {
     setState(() => _loading = true);
     try {
       final res = await ApiClient().dio.get('/teacher/exams');
-      setState(() => _exams = res.data as List);
-    } catch (_) {}
-    setState(() => _loading = false);
+      if (mounted) setState(() => _exams = (res.data as List?) ?? []);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memuat ujian: $e'), backgroundColor: Colors.red));
+      }
+    }
+    if (mounted) setState(() => _loading = false);
   }
 
   Future<void> _generateToken(String examId, String title) async {

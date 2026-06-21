@@ -24,15 +24,27 @@ class _LoginPageState extends State<LoginPage> {
   String? _error;
 
   bool get _isCbt => widget.system == 'CBT';
+  bool get _isPiket => widget.system == 'PIKET';
 
   // Daftar role yang ditampilkan berdasarkan sistem
-  List<String> get _roles => _isCbt ? ['STUDENT', 'TEACHER'] : ['STUDENT', 'COUNSELOR'];
+  List<String> get _roles {
+    if (_isCbt) return ['STUDENT', 'TEACHER'];
+    if (_isPiket) return ['TEACHER'];
+    return ['STUDENT', 'COUNSELOR'];
+  }
 
   // Warna aksen berdasarkan sistem
-  Color get _accentColor => _isCbt ? const Color(0xFF1D4ED8) : const Color(0xFF7C3AED);
-  List<Color> get _gradientColors => _isCbt
-      ? [const Color(0xFF1D4ED8), const Color(0xFF3B82F6)]
-      : [const Color(0xFF6D28D9), const Color(0xFF8B5CF6)];
+  Color get _accentColor {
+    if (_isCbt) return const Color(0xFF1D4ED8);
+    if (_isPiket) return const Color(0xFFF59E0B);
+    return const Color(0xFF7C3AED);
+  }
+
+  List<Color> get _gradientColors {
+    if (_isCbt) return [const Color(0xFF1D4ED8), const Color(0xFF3B82F6)];
+    if (_isPiket) return [const Color(0xFFF59E0B), const Color(0xFFFCD34D)];
+    return [const Color(0xFF6D28D9), const Color(0xFF8B5CF6)];
+  }
 
   @override
   void initState() {
@@ -42,11 +54,13 @@ class _LoginPageState extends State<LoginPage> {
 
   String _roleLabel(String r) {
     if (r == 'STUDENT') return 'Siswa';
+    if (_isPiket && r == 'TEACHER') return 'Guru Piket';
     if (r == 'TEACHER') return 'Guru';
     return 'Guru BK';
   }
 
   Color _buttonColor(String r) {
+    if (_isPiket) return const Color(0xFFF59E0B);
     if (r == 'TEACHER') return const Color(0xFF059669);
     return _accentColor;
   }
@@ -58,6 +72,7 @@ class _LoginPageState extends State<LoginPage> {
         'username': _usernameCtrl.text.trim(),
         'password': _passwordCtrl.text,
         'role': _role,
+        'system': widget.system,
       });
       final token = res.data['token'] as String;
       await ApiClient().setToken(token);
@@ -65,7 +80,9 @@ class _LoginPageState extends State<LoginPage> {
 
       if (!mounted) return;
 
-      if (_role == 'TEACHER') {
+      if (_isPiket && _role == 'TEACHER') {
+        context.go('/piket');
+      } else if (_role == 'TEACHER') {
         context.go('/teacher');
       } else if (_role == 'COUNSELOR') {
         context.go('/counselor');
@@ -121,16 +138,16 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(_isCbt ? 'CBT — Ujian Online' : 'SIBIKONS — BK',
+                    Text(_isCbt ? 'CBT — Ujian Online' : _isPiket ? 'Guru Piket' : 'SIBIKONS — BK',
                       style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                    Text(_isCbt ? 'Sistem Ujian Digital' : 'Bimbingan Konseling',
+                    Text(_isCbt ? 'Sistem Ujian Digital' : _isPiket ? 'Ketertiban Harian' : 'Bimbingan Konseling',
                       style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 12)),
                   ]),
                 ),
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(color: Colors.white.withAlpha(30), borderRadius: BorderRadius.circular(14)),
-                  child: Icon(_isCbt ? Icons.assignment_rounded : Icons.favorite_rounded,
+                  child: Icon(_isCbt ? Icons.assignment_rounded : _isPiket ? Icons.assignment_ind_rounded : Icons.favorite_rounded,
                     color: Colors.white, size: 22),
                 ),
               ]),
@@ -261,6 +278,7 @@ class _LoginPageState extends State<LoginPage> {
                               child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white))
                           : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                               Icon(_role == 'STUDENT' ? Icons.school_rounded
+                                  : _isPiket ? Icons.assignment_ind_rounded
                                   : _role == 'TEACHER' ? Icons.cast_for_education_rounded
                                   : Icons.favorite_rounded,
                                 size: 18, color: Colors.white),

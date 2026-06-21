@@ -33,7 +33,7 @@ class ExamFinishPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => context.go('/student/results'),
+                  onPressed: () => context.go('/student/cbt/results'),
                   child: const Text('Lihat Riwayat Nilai'),
                 ),
               ),
@@ -41,7 +41,7 @@ class ExamFinishPage extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
-                  onPressed: () => context.go('/student'),
+                  onPressed: () => context.go('/student/cbt'),
                   child: const Text('Kembali ke Dashboard'),
                 ),
               ),

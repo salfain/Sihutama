@@ -380,7 +380,7 @@ class _FormSheetState extends State<_FormSheet> {
               ),
               const SizedBox(height: 24),
               DropdownButtonFormField<String>(
-                value: _selectedStudentId,
+                initialValue: _selectedStudentId,
                 dropdownColor: Colors.white,
                 style: const TextStyle(color: Colors.black87),
                 decoration: InputDecoration(

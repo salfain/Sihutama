@@ -83,6 +83,21 @@ class PortalPage extends StatelessWidget {
                     onTap: () => context.go('/login?system=BK'),
                   ),
 
+                  const SizedBox(height: 16),
+
+                  // Kartu PIKET
+                  _SystemCard(
+                    system: 'PIKET',
+                    title: 'Guru Piket',
+                    subtitle: 'Untuk guru terjadwal piket',
+                    description: 'Pencatatan ketertiban harian: keterlambatan, izin keluar, dan kehadiran guru.',
+                    icon: Icons.assignment_ind_rounded,
+                    gradientColors: const [Color(0xFFF59E0B), Color(0xFFFCD34D)],
+                    iconBg: const Color(0xFFD97706),
+                    features: const ['Catat keterlambatan siswa', 'Pantau izin keluar/masuk', 'Rekap kehadiran guru', 'Dashboard harian'],
+                    onTap: () => context.go('/login?system=PIKET'),
+                  ),
+
                   const SizedBox(height: 48),
                 ],
               ),
