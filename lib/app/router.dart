@@ -99,7 +99,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(path: '/student/exams/:id/token', builder: (_, state) =>
         TokenInputPage(examId: state.pathParameters['id']!)),
       GoRoute(path: '/student/exams/:id/confirm', builder: (_, state) =>
-        ExamConfirmPage(examId: state.pathParameters['id']!)),
+        ExamConfirmPage(
+          examId: state.pathParameters['id']!,
+          token: state.uri.queryParameters['token'],
+        )),
       GoRoute(path: '/student/exams/:id/test', builder: (_, state) =>
         TakeExamPage(examId: state.pathParameters['id']!)),
       GoRoute(path: '/student/exams/:id/locked', builder: (_, state) =>

@@ -365,7 +365,7 @@ class _CounselorCounselingPageState extends State<CounselorCounselingPage> with 
                         final nav = Navigator.of(ctx);
                         final messenger = ScaffoldMessenger.of(context);
                         try {
-                          await ApiClient().dio.patch('/counselor/requests/${r['id']}', data: {
+                          await ApiClient().dio.post('/counselor/requests/${r['id']}', data: {
                             'status': status, 'response': responseCtrl.text.trim(),
                           });
                           nav.pop();

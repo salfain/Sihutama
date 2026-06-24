@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import '../../../core/network/api_client.dart';
-import '../../../../app/theme.dart';
+import '../../../app/theme.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
 

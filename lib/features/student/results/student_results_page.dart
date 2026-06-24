@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/network/api_client.dart';
 import '../../shared/widgets/answer_review_sheet.dart';
-import '../../../../app/theme.dart';
+import '../../../app/theme.dart';
 
 const studentPrimaryColor = Color(0xFFEA580C);
 

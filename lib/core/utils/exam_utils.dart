@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
-/// Aturan: UTS, UAS, US hanya bisa dibuat token oleh Admin.
-/// UH, TRYOUT, LAINNYA boleh dibuat token oleh Guru.
-bool canTeacherCreateToken(String? examType) {
-  const adminOnly = ['UTS', 'UAS', 'US'];
-  return !adminOnly.contains(examType);
+/// Token ujian dikelola oleh admin, mengikuti aturan di website.
+bool canTeacherCreateToken(String? _) {
+  return false;
 }
 
 Color examTypeColor(String? type) {

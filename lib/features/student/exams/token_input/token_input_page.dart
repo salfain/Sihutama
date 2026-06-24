@@ -17,14 +17,15 @@ class _TokenInputPageState extends State<TokenInputPage> {
   String? _error;
 
   Future<void> _validate() async {
-    if (_ctrl.text.trim().isEmpty) { setState(() => _error = 'Token wajib diisi'); return; }
+    final token = _ctrl.text.trim().toUpperCase();
+    if (token.isEmpty) { setState(() => _error = 'Token wajib diisi'); return; }
     setState(() { _loading = true; _error = null; });
     try {
       await ApiClient().dio.post('/student/exams/validate-token', data: {
         'examId': widget.examId,
-        'token': _ctrl.text.trim(),
+        'token': token,
       });
-      if (mounted) context.push('/student/exams/${widget.examId}/confirm');
+      if (mounted) context.push('/student/exams/${widget.examId}/confirm?token=${Uri.encodeComponent(token)}');
     } catch (e) {
       setState(() {
         _error = (e is DioException) ? (e.response?.data['error'] ?? 'Token gagal') : 'Koneksi error';

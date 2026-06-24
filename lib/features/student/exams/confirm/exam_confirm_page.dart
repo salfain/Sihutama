@@ -6,7 +6,8 @@ import '../../../../core/network/api_client.dart';
 
 class ExamConfirmPage extends StatefulWidget {
   final String examId;
-  const ExamConfirmPage({super.key, required this.examId});
+  final String? token;
+  const ExamConfirmPage({super.key, required this.examId, this.token});
   @override
   State<ExamConfirmPage> createState() => _ExamConfirmPageState();
 }
@@ -17,7 +18,10 @@ class _ExamConfirmPageState extends State<ExamConfirmPage> {
   Future<void> _start() async {
     setState(() => _loading = true);
     try {
-      await ApiClient().dio.post('/student/exams/start', data: {'examId': widget.examId});
+      await ApiClient().dio.post('/student/exams/start', data: {
+        'examId': widget.examId,
+        if (widget.token != null) 'token': widget.token,
+      });
       if (mounted) context.go('/student/exams/${widget.examId}/test');
     } catch (e) {
       if (mounted) {

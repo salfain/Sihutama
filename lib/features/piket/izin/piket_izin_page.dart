@@ -170,7 +170,10 @@ class _State extends State<PiketIzinPage> {
 
     setState(() => _returningId = id);
     try {
-      await ApiClient().dio.patch('/piket/izin/${Uri.encodeComponent(id)}/kembali');
+      await ApiClient().dio.post(
+        '/piket/izin/${Uri.encodeComponent(id)}/kembali',
+        data: const {},
+      );
       if (!mounted) return;
       await _load();
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

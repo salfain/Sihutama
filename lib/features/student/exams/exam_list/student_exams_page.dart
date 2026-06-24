@@ -124,6 +124,7 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
     final isDark = AppTheme.isDark(context);
     final attempt = e['attempt'];
     final isDone = attempt != null && (attempt['status'] == 'SUBMITTED' || attempt['status'] == 'AUTO_SUBMITTED');
+    final isInProgress = attempt != null && attempt['status'] == 'IN_PROGRESS';
     final now = DateTime.now();
     final start = DateTime.tryParse(e['startAt'] ?? '') ?? now;
     final end = DateTime.tryParse(e['endAt'] ?? '') ?? now;
@@ -170,7 +171,20 @@ class _StudentExamsPageState extends State<StudentExamsPage> {
               ],
             ),
             const SizedBox(height: 16),
-            if (isAvailable)
+            if (isInProgress)
+              SizedBox(width: double.infinity, child: ElevatedButton.icon(
+                onPressed: () => context.go('/student/exams/${e['id']}/test'),
+                icon: const Icon(Icons.play_arrow_rounded, size: 18),
+                label: const Text('Lanjutkan Ujian', style: TextStyle(fontWeight: FontWeight.bold)),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber.shade600,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              ))
+            else if (isAvailable)
               SizedBox(width: double.infinity, child: ElevatedButton(
                 onPressed: () => context.push('/student/exams/${e['id']}/token'),
                 style: ElevatedButton.styleFrom(
